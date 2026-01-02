@@ -10,45 +10,32 @@ export default function LoginScreen() {
     };
 
     return (
-        <div className="flex flex-col items-center justify-center min-h-screen px-4 animate-fade-in relative overflow-hidden">
-            {/* Background decorations */}
-            <div className="absolute top-0 left-0 w-full h-full pointer-events-none">
-                <div className="absolute -top-20 -right-20 w-64 h-64 bg-soft-sage/20 rounded-full blur-3xl"></div>
-                <div className="absolute top-1/3 -left-20 w-80 h-80 bg-forest-green/5 rounded-full blur-3xl"></div>
-            </div>
+        <div className="min-h-screen flex flex-col items-center justify-center p-6 bg-brand-bg relative overflow-hidden">
+            {/* Background Blobs */}
+            <div className="absolute top-[-20%] left-[-10%] w-[600px] h-[600px] bg-brand-secondary/40 rounded-full blur-[100px] animate-pulse" />
+            <div className="absolute bottom-[-10%] right-[-5%] w-[400px] h-[400px] bg-brand-primary/10 rounded-full blur-[80px]" />
 
-            <div className="z-10 flex flex-col items-center max-w-md w-full text-center space-y-12">
-                <div className="relative w-32 h-32 md:w-40 md:h-40 animate-slide-up" style={{ animationDelay: "0.1s" }}>
-                    <Image
-                        src="/better-talk-logo.png"
-                        alt="Better Talk Logo"
-                        fill
-                        className="object-contain"
-                        priority
-                    />
-                </div>
-
-                <div className="space-y-4 animate-slide-up" style={{ animationDelay: "0.2s" }}>
-                    <h1 className="text-4xl md:text-5xl font-semibold text-forest-green tracking-tight">
-                        Better Talk
-                    </h1>
-                    <p className="text-lg text-gray-600 font-light">
-                        A safe space for growth, verified mentors, and meaningful connections.
-                    </p>
-                </div>
-
-                <div className="w-full animate-slide-up" style={{ animationDelay: "0.3s" }}>
-                    <button
-                        onClick={handleLogin}
-                        className="group w-full flex items-center justify-center gap-3 bg-forest-green text-white py-4 px-6 rounded-2xl hover:bg-forest-green/90 transition-all active:scale-[0.98] shadow-lg hover:shadow-xl shadow-forest-green/20"
-                    >
-                        <span className="font-medium text-lg">Continue with Google</span>
-                        <ArrowRight className="w-5 h-5 group-hover:translate-x-1 transition-transform" />
-                    </button>
-                    <div className="mt-6 text-sm text-gray-400">
-                        By continuing, you agree to our Terms & Privacy Policy
+            <div className="w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50 animate-slide-up relative z-10">
+                <div className="text-center space-y-3 mb-10">
+                    <div className="w-20 h-20 bg-brand-primary/10 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-6 shadow-sm">
+                        <Image src="/better-talk-logo.png" alt="Logo" width={48} height={48} className="-rotate-3" />
                     </div>
+                    <h1 className="text-3xl font-bold text-brand-text tracking-tight">Welcome Back</h1>
+                    <p className="text-gray-500 text-sm">Join the conversation with your community</p>
                 </div>
+
+                <button
+                    onClick={handleLogin}
+                    className="w-full bg-brand-dark text-white py-4 px-6 rounded-xl font-medium shadow-lg shadow-brand-dark/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group"
+                >
+                    <Image src="https://www.google.com/favicon.ico" alt="G" width={20} height={20} className="w-5 h-5 bg-white rounded-full p-0.5" />
+                    <span>Continue with Google</span>
+                    <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
+                </button>
+
+                <p className="text-center text-xs text-gray-400 mt-8">
+                    By continuing, you agree to our Terms & Privacy Policy
+                </p>
             </div>
         </div>
     );

@@ -9,11 +9,18 @@ const config: Config = {
   theme: {
     extend: {
       colors: {
-        "warm-sand": "#FDFCF8",
-        "soft-clay": "#E6E2DD",
-        "forest-green": "#2C4A3B",
-        "soft-sage": "#9EB3A8",
-        "charcoal": "#2D2D2D",
+        "brand-primary": "#34C6F4", // Cyan Main
+        "brand-secondary": "#E1F5FE", // Light Cyan
+        "brand-bg": "#F8FAFC", // Cool White/Slate 50
+        "brand-border": "#E2E8F0", // Slate 200
+        "brand-text": "#1E293B", // Slate 800
+        "brand-dark": "#0F172A", // Slate 900
+        // Legacy mappings (temporary if needed, but we will replace)
+        "warm-sand": "#F8FAFC",
+        "soft-clay": "#E2E8F0",
+        "forest-green": "#34C6F4",
+        "soft-sage": "#E1F5FE",
+        "charcoal": "#1E293B",
       },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",

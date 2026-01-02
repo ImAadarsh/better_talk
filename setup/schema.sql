@@ -8,6 +8,7 @@
 CREATE TABLE users (
   id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   google_id             VARCHAR(191) NOT NULL,
+  name                  VARCHAR(191) DEFAULT NULL,
   email                 VARCHAR(191) NOT NULL,
   phone_number          VARCHAR(30) NOT NULL,
   age                   INT NOT NULL,

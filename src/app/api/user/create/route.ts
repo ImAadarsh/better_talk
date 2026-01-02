@@ -11,9 +11,9 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { phone, age, username } = await req.json();
+        const { phone, age, username, name } = await req.json();
 
-        if (!phone || !age || !username) {
+        if (!phone || !age || !username || !name) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
@@ -37,9 +37,9 @@ export async function POST(req: Request) {
 
         // Insert new user
         await connection.execute(
-            `INSERT INTO users (google_id, email, phone_number, age, anonymous_username, role, avatar_url) 
-       VALUES (?, ?, ?, ?, ?, 'user', ?)`,
-            [(session.user as any).id, session.user.email, phone, age, username, session.user.image || null]
+            `INSERT INTO users (google_id, email, phone_number, age, anonymous_username, role, avatar_url, name) 
+       VALUES (?, ?, ?, ?, ?, 'user', ?, ?)`,
+            [(session.user as any).id, session.user.email, phone, age, username, session.user.image || null, name]
         );
 
         await connection.end();
