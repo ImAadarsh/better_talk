@@ -258,7 +258,7 @@ export default function GroupDetailPage() {
 
     return (
         <DashboardLayout>
-            <div className="flex flex-col h-screen md:h-full relative bg-white md:bg-transparent">
+            <div className="flex flex-col h-full relative bg-white md:bg-transparent">
                 {/* Header - Collapsible */}
                 <div className={`bg-white transition-all duration-300 ease-in-out border-b border-soft-clay/30 overflow-hidden relative z-50 sticky top-0 shadow-sm ${headerCollapsed ? "py-3 px-4" : "py-8 px-8 text-center"
                     }`}>
@@ -336,7 +336,7 @@ export default function GroupDetailPage() {
                 </div>
 
                 {/* Posts Feed */}
-                <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 pb-36 md:pb-32 bg-warm-sand/30" ref={scrollRef}>
+                <div className="flex-1 overflow-y-auto px-4 py-6 space-y-4 pb-60 md:pb-32 bg-warm-sand/30" ref={scrollRef}>
                     {posts.length === 0 ? (
                         <div className="text-center py-10 text-gray-400 italic">
                             No conversations yet. Start one!

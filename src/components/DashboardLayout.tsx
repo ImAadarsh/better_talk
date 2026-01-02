@@ -26,7 +26,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const isGroupDetail = /^\/groups\/\d+$/.test(pathname);
 
     return (
-        <div className="flex h-screen bg-warm-sand">
+        <div className="flex h-screen bg-warm-sand overflow-hidden">
             {/* Desktop Sidebar */}
             <aside className="hidden md:flex flex-col w-64 bg-white border-r border-soft-clay/30">
                 <div className="p-6 flex items-center gap-3">
@@ -78,7 +78,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </aside>
 
             {/* Main Content */}
-            <main className="flex-1 overflow-y-auto relative bg-warm-sand">
+            <main className={`flex-1 relative bg-warm-sand overflow-x-hidden ${isGroupDetail ? 'overflow-y-hidden h-full flex flex-col' : 'overflow-y-auto'}`}>
                 {/* Mobile Header - Hidden on Group Detail */}
                 {!isGroupDetail && (
                     <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-soft-clay/30 px-4 py-3 flex items-center justify-between">
@@ -139,7 +139,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </div>
                 )}
 
-                <div className={`h-full ${isGroupDetail ? 'p-0' : 'p-4 md:p-8 max-w-5xl mx-auto pb-24 md:pb-8'}`}>
+                <div className={`h-full ${isGroupDetail ? 'p-0' : 'p-4 md:p-8 max-w-5xl mx-auto pb-40 md:pb-8'}`}>
                     {children}
                 </div>
             </main>
