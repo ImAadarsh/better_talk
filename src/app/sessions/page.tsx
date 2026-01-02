@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Loader2, Calendar, Clock, Video, User, MoreVertical } from "lucide-react";
+import { Calendar, Clock, Video, User, MoreVertical } from "lucide-react";
 import { format, isPast, parseISO } from "date-fns";
+import ScientificLoader from "@/components/ScientificLoader";
 
 interface Session {
     id: number;
@@ -74,8 +75,8 @@ export default function SessionsPage() {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
+                    <div className="flex justify-center items-center h-96">
+                        <ScientificLoader />
                     </div>
                 ) : displayedSessions.length === 0 ? (
                     <div className="text-center py-20 bg-gray-50 rounded-3xl border border-gray-100">

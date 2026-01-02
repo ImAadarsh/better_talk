@@ -1,11 +1,43 @@
 "use client";
 
-import { motion } from "framer-motion";
-import { Mail, MapPin, Phone, Send } from "lucide-react";
+import { useState } from "react";
+import { motion, AnimatePresence } from "framer-motion";
+import { Mail, MapPin, Phone, Send, CheckCircle, Loader2 } from "lucide-react";
 import PublicNavbar from "@/components/PublicNavbar";
 import Footer from "@/components/Footer";
 
 export default function ContactPage() {
+    const [formData, setFormData] = useState({
+        name: "",
+        email: "",
+        subject: "",
+        message: ""
+    });
+    const [status, setStatus] = useState<'idle' | 'loading' | 'success' | 'error'>('idle');
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+        setStatus('loading');
+
+        try {
+            const res = await fetch("/api/contact", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify(formData)
+            });
+
+            if (res.ok) {
+                setStatus('success');
+                setFormData({ name: "", email: "", subject: "", message: "" });
+            } else {
+                setStatus('error');
+            }
+        } catch (error) {
+            console.error(error);
+            setStatus('error');
+        }
+    };
+
     return (
         <div className="min-h-screen bg-white">
             <PublicNavbar />
@@ -78,32 +110,105 @@ export default function ContactPage() {
                             animate={{ opacity: 1, x: 0 }}
                             transition={{ duration: 0.6, delay: 0.4 }}
                         >
-                            <form className="space-y-6">
-                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                                    <div className="space-y-2">
-                                        <label htmlFor="name" className="text-sm font-medium text-gray-700">Name</label>
-                                        <input type="text" id="name" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all" placeholder="Your name" />
-                                    </div>
-                                    <div className="space-y-2">
-                                        <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
-                                        <input type="email" id="email" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all" placeholder="you@example.com" />
-                                    </div>
-                                </div>
+                            <AnimatePresence mode="wait">
+                                {status === 'success' ? (
+                                    <motion.div
+                                        key="success"
+                                        initial={{ opacity: 0, scale: 0.9 }}
+                                        animate={{ opacity: 1, scale: 1 }}
+                                        exit={{ opacity: 0, scale: 0.9 }}
+                                        className="bg-green-50 rounded-3xl p-10 text-center border border-green-100 h-full flex flex-col items-center justify-center"
+                                    >
+                                        <div className="w-16 h-16 bg-white rounded-full flex items-center justify-center text-green-500 shadow-sm mb-6">
+                                            <CheckCircle className="w-8 h-8" />
+                                        </div>
+                                        <h3 className="text-2xl font-bold text-gray-900 mb-2">Message Sent!</h3>
+                                        <p className="text-gray-600 mb-8">Thank you for reaching out. We&apos;ll get back to you shortly.</p>
+                                        <button
+                                            onClick={() => setStatus('idle')}
+                                            className="text-green-600 font-bold hover:underline"
+                                        >
+                                            Send another message
+                                        </button>
+                                    </motion.div>
+                                ) : (
+                                    <motion.form
+                                        key="form"
+                                        onSubmit={handleSubmit}
+                                        className="space-y-6"
+                                        initial={{ opacity: 1 }}
+                                        exit={{ opacity: 0 }}
+                                    >
+                                        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                            <div className="space-y-2">
+                                                <label htmlFor="name" className="text-sm font-medium text-gray-700">Name</label>
+                                                <input
+                                                    required
+                                                    type="text"
+                                                    id="name"
+                                                    value={formData.name}
+                                                    onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
+                                                    placeholder="Your name"
+                                                />
+                                            </div>
+                                            <div className="space-y-2">
+                                                <label htmlFor="email" className="text-sm font-medium text-gray-700">Email</label>
+                                                <input
+                                                    required
+                                                    type="email"
+                                                    id="email"
+                                                    value={formData.email}
+                                                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                                                    className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
+                                                    placeholder="you@example.com"
+                                                />
+                                            </div>
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <label htmlFor="subject" className="text-sm font-medium text-gray-700">Subject</label>
-                                    <input type="text" id="subject" className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all" placeholder="How can we help?" />
-                                </div>
+                                        <div className="space-y-2">
+                                            <label htmlFor="subject" className="text-sm font-medium text-gray-700">Subject</label>
+                                            <input
+                                                type="text"
+                                                id="subject"
+                                                value={formData.subject}
+                                                onChange={(e) => setFormData({ ...formData, subject: e.target.value })}
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all"
+                                                placeholder="How can we help?"
+                                            />
+                                        </div>
 
-                                <div className="space-y-2">
-                                    <label htmlFor="message" className="text-sm font-medium text-gray-700">Message</label>
-                                    <textarea id="message" rows={5} className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all resize-none" placeholder="Tell us more..."></textarea>
-                                </div>
+                                        <div className="space-y-2">
+                                            <label htmlFor="message" className="text-sm font-medium text-gray-700">Message</label>
+                                            <textarea
+                                                required
+                                                id="message"
+                                                rows={5}
+                                                value={formData.message}
+                                                onChange={(e) => setFormData({ ...formData, message: e.target.value })}
+                                                className="w-full px-4 py-3 rounded-xl border border-gray-200 focus:border-brand-primary focus:ring-2 focus:ring-brand-primary/20 outline-none transition-all resize-none"
+                                                placeholder="Tell us more..."
+                                            ></textarea>
+                                        </div>
 
-                                <button type="submit" className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2">
-                                    Send Message <Send className="w-4 h-4" />
-                                </button>
-                            </form>
+                                        {status === 'error' && (
+                                            <p className="text-red-500 text-sm font-medium">Something went wrong. Please try again.</p>
+                                        )}
+
+                                        <button
+                                            type="submit"
+                                            disabled={status === 'loading'}
+                                            className="w-full bg-gray-900 text-white font-bold py-4 rounded-xl shadow-lg hover:bg-gray-800 transition-all hover:scale-[1.02] active:scale-[0.98] flex items-center justify-center gap-2 disabled:opacity-50"
+                                        >
+                                            {status === 'loading' ? (
+                                                <Loader2 className="w-5 h-5 animate-spin" />
+                                            ) : (
+                                                <>Send Message <Send className="w-4 h-4" /></>
+                                            )}
+                                        </button>
+                                    </motion.form>
+                                )}
+                            </AnimatePresence>
                         </motion.div>
                     </div>
                 </div>
@@ -113,3 +218,4 @@ export default function ContactPage() {
         </div>
     );
 }
+

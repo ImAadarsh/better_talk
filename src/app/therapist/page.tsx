@@ -6,6 +6,8 @@ import { ArrowRight, CheckCircle, GraduationCap, Loader2, LogOut, Phone, Stethos
 import Image from "next/image";
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
+import ScientificLoader from "@/components/ScientificLoader";
+
 
 const COUNTRIES = [
     { code: "+91", name: "India", flag: "🇮🇳" },
@@ -107,7 +109,7 @@ export default function TherapistOnboarding() {
     if (status === "loading") {
         return (
             <div className="h-screen flex items-center justify-center bg-brand-bg">
-                <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
+                <ScientificLoader />
             </div>
         );
     }
@@ -193,7 +195,7 @@ export default function TherapistOnboarding() {
     if (isVerified) {
         return (
             <div className="h-screen flex items-center justify-center bg-brand-bg">
-                <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
+                <ScientificLoader />
             </div>
         );
     }

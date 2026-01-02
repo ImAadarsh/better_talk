@@ -257,3 +257,14 @@ CREATE TABLE notification_logs (
     FOREIGN KEY (user_id) REFERENCES users(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 7. Contact Messages
+CREATE TABLE contact_messages (
+  id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  name                  VARCHAR(191) NOT NULL,
+  email                 VARCHAR(191) NOT NULL,
+  subject               VARCHAR(191) DEFAULT NULL,
+  message               TEXT NOT NULL,
+  created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+

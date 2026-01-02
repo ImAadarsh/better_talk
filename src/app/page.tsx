@@ -5,7 +5,7 @@ import { useEffect, useState } from "react";
 import LoginScreen from "@/components/LoginScreen";
 import LandingPage from "@/components/LandingPage";
 import OnboardingScreen from "@/components/OnboardingScreen";
-import { Loader2 } from "lucide-react";
+import ScientificLoader from "@/components/ScientificLoader";
 
 export default function Home() {
   const { data: session, status } = useSession();
@@ -47,10 +47,11 @@ export default function Home() {
   if (view === "loading") {
     return (
       <div className="flex items-center justify-center min-h-screen bg-warm-sand">
-        <Loader2 className="w-10 h-10 text-forest-green animate-spin" />
+        <ScientificLoader />
       </div>
     );
   }
+
 
   if (view === "landing") {
     return <LandingPage />;
@@ -62,7 +63,7 @@ export default function Home() {
 
   return (
     <div className="flex items-center justify-center min-h-screen bg-warm-sand">
-      <Loader2 className="w-10 h-10 text-forest-green animate-spin" />
+      <ScientificLoader />
     </div>
   );
 }

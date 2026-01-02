@@ -5,6 +5,8 @@ import TherapistLayout from "@/components/TherapistLayout";
 import { Loader2, User, Edit2, BadgeCheck, Stethoscope, Phone, Globe, Award, BookOpen, Clock, Camera } from "lucide-react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
+import ScientificLoader from "@/components/ScientificLoader";
+
 
 interface MentorProfile {
     id: number;
@@ -147,7 +149,7 @@ export default function TherapistProfilePage() {
         return (
             <TherapistLayout>
                 <div className="flex justify-center py-20">
-                    <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                    <ScientificLoader />
                 </div>
             </TherapistLayout>
         );

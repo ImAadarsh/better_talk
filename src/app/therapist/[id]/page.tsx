@@ -5,6 +5,7 @@ import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Loader2, CheckCircle, MapPin, Calendar, Clock, ChevronLeft, ChevronRight, Star, Activity, ShieldCheck, Users } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import ScientificLoader from "@/components/ScientificLoader";
 import { format, addDays, isSameDay, parseISO } from "date-fns";
 
 interface Therapist {
@@ -88,7 +89,7 @@ export default function TherapistProfilePage() {
         return (
             <DashboardLayout>
                 <div className="flex justify-center items-center h-[80vh]">
-                    <Loader2 className="w-10 h-10 text-brand-primary animate-spin" />
+                    <ScientificLoader />
                 </div>
             </DashboardLayout>
         );

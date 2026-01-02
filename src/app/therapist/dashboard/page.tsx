@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import TherapistLayout from "@/components/TherapistLayout";
 import { useSession } from "next-auth/react";
-import { Loader2, Users, Calendar, TrendingUp, Clock } from "lucide-react";
+import { Users, Calendar, TrendingUp, Clock } from "lucide-react";
 import Link from "next/link";
+import ScientificLoader from "@/components/ScientificLoader";
 import { format, parseISO } from "date-fns";
 
 interface DashboardStats {
@@ -50,8 +51,8 @@ export default function TherapistDashboard() {
                 </header>
 
                 {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                    <div className="flex justify-center items-center h-96">
+                        <ScientificLoader />
                     </div>
                 ) : (
                     <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">

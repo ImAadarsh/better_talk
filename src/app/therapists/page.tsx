@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Loader2, CheckCircle, Users, Activity, Star } from "lucide-react";
+import { CheckCircle, Users, Activity, Star } from "lucide-react";
 import Link from "next/link";
+import ScientificLoader from "@/components/ScientificLoader";
 
 interface Therapist {
     id: number;
@@ -46,8 +47,8 @@ export default function TherapistsPage() {
                 </div>
 
                 {loading ? (
-                    <div className="flex justify-center items-center h-64">
-                        <Loader2 className="w-10 h-10 text-brand-primary animate-spin" />
+                    <div className="flex justify-center items-center h-96">
+                        <ScientificLoader />
                     </div>
                 ) : therapists.length === 0 ? (
                     <div className="text-center py-20 bg-gray-50 rounded-3xl border border-gray-100">
