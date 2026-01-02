@@ -1,7 +1,8 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+
 
 export const dynamic = 'force-dynamic';
 
@@ -12,20 +13,18 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
-        const [userRows] = await connection.execute(
+        const [userRows] = await pool.execute(
             "SELECT id FROM users WHERE email = ?",
             [session.user?.email]
-        );
-        const userId = (userRows as any)[0].id;
+        ) as any[];
 
-        const [rows] = await connection.execute(
+        if (userRows.length === 0) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        const userId = userRows[0].id;
+
+        const [rows] = await pool.execute(
             `SELECT g.id, g.name, g.description, g.slug, 
        (SELECT COUNT(*) FROM group_members gm WHERE gm.group_id = g.id) as member_count,
        (SELECT COUNT(*) FROM group_members gm2 WHERE gm2.group_id = g.id AND gm2.user_id = ?) as is_member
@@ -34,8 +33,6 @@ export async function GET() {
        ORDER BY g.created_at DESC`,
             [userId]
         );
-
-        await connection.end();
 
         return NextResponse.json(rows);
     } catch (error) {

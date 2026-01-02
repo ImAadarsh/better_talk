@@ -1,13 +1,13 @@
 "use client";
 
-import Link from "next/link";
 import Image from "next/image";
+import Link from "next/link";
 import { ArrowRight } from "lucide-react";
 import { signIn } from "next-auth/react";
 
-export default function LoginScreen() {
+export default function RegisterPage() {
     const handleLogin = () => {
-        signIn("google");
+        signIn("google", { callbackUrl: "/onboarding" });
     };
 
     return (
@@ -21,7 +21,7 @@ export default function LoginScreen() {
                     <div className="w-20 h-20 bg-brand-primary/10 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-6 shadow-sm">
                         <img src="/better-talk-logo.png" alt="Logo" width="48" height="48" className="-rotate-3" />
                     </div>
-                    <h1 className="text-3xl font-bold text-brand-text tracking-tight">Welcome Back</h1>
+                    <h1 className="text-3xl font-bold text-brand-text tracking-tight">Create Account</h1>
                     <p className="text-gray-500 text-sm">Join the conversation with your community</p>
                 </div>
 
@@ -30,14 +30,14 @@ export default function LoginScreen() {
                     className="w-full bg-brand-dark text-white py-4 px-6 rounded-xl font-medium shadow-lg shadow-brand-dark/20 hover:scale-[1.02] active:scale-[0.98] transition-all flex items-center justify-center gap-3 group"
                 >
                     <Image src="https://www.google.com/favicon.ico" alt="G" width={20} height={20} className="w-5 h-5 bg-white rounded-full p-0.5" />
-                    <span>Continue with Google</span>
+                    <span>Sign up with Google</span>
                     <ArrowRight className="w-4 h-4 text-gray-400 group-hover:text-white group-hover:translate-x-1 transition-all" />
                 </button>
 
                 <p className="text-center text-sm text-gray-500 mt-8">
-                    New here?{" "}
-                    <Link href="/register" className="text-brand-primary font-medium hover:underline">
-                        Create an account
+                    Already have an account?{" "}
+                    <Link href="/" className="text-brand-primary font-medium hover:underline">
+                        Sign In
                     </Link>
                 </p>
 

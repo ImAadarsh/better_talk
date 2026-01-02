@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -18,15 +18,8 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
         // 1. Check if user exists
-        const [users] = await connection.execute(
+        const [users] = await pool.execute(
             "SELECT id, role FROM users WHERE email = ?",
             [session.user.email]
         ) as any[];
@@ -42,7 +35,7 @@ export async function POST(req: Request) {
             const randomSuffix = Math.floor(Math.random() * 10000);
             const username = `therapist_${randomSuffix}`; // Placeholder
 
-            const [insertResult] = await connection.execute(
+            const [insertResult] = await pool.execute(
                 `INSERT INTO users (google_id, name, email, image, phone_number, age, anonymous_username, role, is_active)
                  VALUES (?, ?, ?, ?, ?, ?, ?, 'mentor', 1)`,
                 [googleId, fullName, session.user.email, session.user.image, contactNumber, 0, username]
@@ -58,14 +51,13 @@ export async function POST(req: Request) {
             // OR we allow it but they lose their user access? The requirement says "if already a user exist as a user then will show error"
 
             if (users[0].role === 'user') {
-                await connection.end();
                 return NextResponse.json({
                     error: "You are already registered as a User. You cannot apply as a Therapist with this account."
                 }, { status: 403 });
             }
 
             // Update existing user (if they were already a mentor or admin, maybe?)
-            await connection.execute(
+            await pool.execute(
                 "UPDATE users SET name = ?, image = ?, phone_number = ? WHERE id = ?",
                 [fullName, session.user.image, contactNumber, userId]
             );
@@ -73,14 +65,14 @@ export async function POST(req: Request) {
         }
 
         // 2. Check and Upsert Mentor
-        const [existingMentors] = await connection.execute(
+        const [existingMentors] = await pool.execute(
             "SELECT id FROM mentors WHERE user_id = ?",
             [userId]
         ) as any[];
 
         if (existingMentors.length > 0) {
             // Update existing application
-            await connection.execute(
+            await pool.execute(
                 `UPDATE mentors 
                  SET designation = ?, patients_treated = ?, bio = ?, contact_number = ?, is_verified = 0 
                  WHERE id = ?`,
@@ -88,7 +80,7 @@ export async function POST(req: Request) {
             );
         } else {
             // Insert new mentor record
-            await connection.execute(
+            await pool.execute(
                 `INSERT INTO mentors (user_id, designation, patients_treated, bio, contact_number, is_verified)
                  VALUES (?, ?, ?, ?, ?, 0)`,
                 [userId, designation, patientsTreated, bio, contactNumber]
@@ -97,12 +89,10 @@ export async function POST(req: Request) {
 
         // 3. Update user role to 'mentor' (even if unverified, or keep as user until verified?) 
         // 3. Ensure role is mentor
-        await connection.execute(
+        await pool.execute(
             "UPDATE users SET role = 'mentor' WHERE id = ?",
             [userId]
         );
-
-        await connection.end();
 
         return NextResponse.json({ success: true });
 

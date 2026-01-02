@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -15,60 +15,51 @@ export async function GET(
 
         const groupId = params.id;
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
-        const [userRows] = await connection.execute(
+        const [userRows] = await pool.execute(
             "SELECT id FROM users WHERE email = ?",
             [session.user?.email]
-        );
+        ) as any[];
+
         // Ensure userRows is an array and has elements before accessing [0]
         if (!Array.isArray(userRows) || userRows.length === 0) {
-            await connection.end();
             return NextResponse.json({ error: "User not found" }, { status: 404 });
         }
-        const userId = (userRows as any)[0].id;
+        const userId = userRows[0].id;
 
         // Fetch group details
-        const [groupRows] = await connection.execute(
+        const [groupRows] = await pool.execute(
             "SELECT * FROM groups WHERE id = ?",
             [groupId]
-        );
+        ) as any[];
 
         if (!Array.isArray(groupRows) || groupRows.length === 0) {
-            await connection.end();
             return NextResponse.json({ error: "Group not found" }, { status: 404 });
         }
 
-        const group = (groupRows as any)[0];
+        const group = groupRows[0];
 
-        // Fetch posts (mock/empty for now or strict schema)
-        // We need to check if group_posts table exists and has data.
-        // Based on schema it does.
         // Fetch posts with upvote count and user status
-        const [postRows] = await connection.execute(
-            `SELECT p.id, p.content, p.created_at, u.anonymous_username,
+        const [postRows] = await pool.execute(
+            `SELECT p.id, p.content, p.created_at, 
+       u.anonymous_username, u.name as author_name, u.role as author_role,
+       m.is_verified,
        (SELECT COUNT(*) FROM post_upvotes WHERE post_id = p.id) as upvote_count,
        (SELECT COUNT(*) FROM post_upvotes WHERE post_id = p.id AND user_id = ?) as has_upvoted,
-       (SELECT COUNT(*) FROM group_post_comments WHERE post_id = p.id AND is_deleted = 0) as comment_count
+       (SELECT COUNT(*) FROM group_post_comments WHERE post_id = p.id AND is_deleted = 0) as comment_count,
+       CASE WHEN p.user_id = ? THEN 1 ELSE 0 END as is_author
        FROM group_posts p
        JOIN users u ON p.user_id = u.id
+       LEFT JOIN mentors m ON u.id = m.user_id
        WHERE p.group_id = ? AND p.is_deleted = 0
        ORDER BY p.created_at DESC`,
-            [userId, params.id]
+            [userId, userId, params.id]
         );
 
         // Check membership
-        const [memberRows] = await connection.execute(
-            "SELECT * FROM group_members WHERE group_id = ? AND user_id = (SELECT id FROM users WHERE email = ?)",
-            [groupId, session.user?.email]
-        );
-
-        await connection.end();
+        const [memberRows] = await pool.execute(
+            "SELECT * FROM group_members WHERE group_id = ? AND user_id = ?",
+            [groupId, userId]
+        ) as any[];
 
         return NextResponse.json({
             group,

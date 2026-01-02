@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -16,32 +16,28 @@ export async function POST(
         const groupId = params.id;
         const { action } = await req.json(); // 'join' or 'leave'
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
-        const [userRows] = await connection.execute(
+        const [userRows] = await pool.execute(
             "SELECT id FROM users WHERE email = ?",
             [session.user?.email]
-        );
-        const userId = (userRows as any)[0].id;
+        ) as any[];
+
+        if (!userRows || userRows.length === 0) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        const userId = userRows[0].id;
 
         if (action === 'join') {
-            await connection.execute(
+            await pool.execute(
                 "INSERT IGNORE INTO group_members (group_id, user_id) VALUES (?, ?)",
                 [groupId, userId]
             );
         } else {
-            await connection.execute(
+            await pool.execute(
                 "DELETE FROM group_members WHERE group_id = ? AND user_id = ?",
                 [groupId, userId]
             );
         }
-
-        await connection.end();
 
         return NextResponse.json({ success: true });
     } catch (error) {

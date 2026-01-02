@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -17,32 +17,22 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
         // Check if user already exists (double check)
-        const [existing] = await connection.execute(
+        const [existing] = await pool.execute(
             "SELECT id FROM users WHERE email = ? OR google_id = ?",
             [session.user.email, (session.user as any).id]
-        );
+        ) as any[];
 
-        if (Array.isArray(existing) && existing.length > 0) {
-            await connection.end();
+        if (existing.length > 0) {
             return NextResponse.json({ error: "User already exists" }, { status: 409 });
         }
 
         // Insert new user
-        await connection.execute(
+        await pool.execute(
             `INSERT INTO users (google_id, email, phone_number, age, anonymous_username, role, avatar_url, name) 
        VALUES (?, ?, ?, ?, ?, 'user', ?, ?)`,
             [(session.user as any).id, session.user.email, phone, age, username, session.user.image || null, name]
         );
-
-        await connection.end();
 
         return NextResponse.json({ success: true });
     } catch (error) {

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 
 export async function POST(req: Request) {
     try {
@@ -9,21 +9,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ available: false, error: "Username too short" });
         }
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
-        const [rows] = await connection.execute(
+        const [rows] = await pool.execute(
             "SELECT id FROM users WHERE anonymous_username = ?",
             [username]
-        );
+        ) as any[];
 
-        await connection.end();
-
-        if (Array.isArray(rows) && rows.length > 0) {
+        if (rows.length > 0) {
             return NextResponse.json({ available: false });
         } else {
             return NextResponse.json({ available: true });

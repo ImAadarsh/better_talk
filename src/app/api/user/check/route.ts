@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 
 export async function POST(req: Request) {
     try {
@@ -9,21 +9,12 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Email is required" }, { status: 400 });
         }
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
-        const [rows] = await connection.execute(
+        const [rows] = await pool.execute(
             "SELECT id, anonymous_username FROM users WHERE email = ?",
             [email]
-        );
+        ) as any[];
 
-        await connection.end();
-
-        if (Array.isArray(rows) && rows.length > 0) {
+        if (rows.length > 0) {
             return NextResponse.json({ exists: true, user: rows[0] });
         } else {
             return NextResponse.json({ exists: false });

@@ -1,19 +1,21 @@
-import CommunityGroupsList from "@/components/CommunityGroupsList";
-import DashboardLayout from "@/components/DashboardLayout";
+"use client";
 
-export default function GroupsPage() {
+import TherapistLayout from "@/components/TherapistLayout";
+import CommunityGroupsList from "@/components/CommunityGroupsList";
+
+export default function TherapistCommunityPage() {
     return (
-        <DashboardLayout>
+        <TherapistLayout>
             <div className="space-y-8 animate-fade-in pb-20">
                 <div className="flex flex-col md:flex-row md:items-end justify-between gap-4">
                     <div>
                         <h1 className="text-4xl font-bold text-gray-900 tracking-tight">Communities</h1>
-                        <p className="text-gray-500 mt-2 text-lg">Find your safe space to share and grow.</p>
+                        <p className="text-gray-500 mt-2 text-lg">Connect with other professionals and patients.</p>
                     </div>
                 </div>
 
-                <CommunityGroupsList />
+                <CommunityGroupsList basePath="/therapist/community" />
             </div>
-        </DashboardLayout>
+        </TherapistLayout>
     );
 }

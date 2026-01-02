@@ -7,14 +7,14 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public paths that do not require auth
-    const publicPaths = ['/login', '/about', '/therapist'];
+    const publicPaths = ['/login', '/about', '/therapist', '/register'];
     if (publicPaths.some(path => pathname.startsWith(path)) || pathname === '/') {
         return NextResponse.next();
     }
 
     // Check for auth
     if (!token) {
-        const url = new URL('/login', request.url);
+        const url = new URL('/', request.url);
         url.searchParams.set('callbackUrl', encodeURI(request.url));
         return NextResponse.redirect(url);
     }
@@ -31,5 +31,5 @@ export async function middleware(request: NextRequest) {
 }
 
 export const config = {
-    matcher: ['/((?!api|_next/static|_next/image|favicon.ico).*)'],
+    matcher: ['/((?!api|_next/static|_next/image|favicon.ico|.*\\.(?:svg|png|jpg|jpeg|gif|webp)$).*)'],
 };

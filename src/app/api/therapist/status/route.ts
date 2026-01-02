@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -11,21 +11,12 @@ export async function GET(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
         // Check if user is a mentor
-        const [mentors] = await connection.execute(
+        const [mentors] = await pool.execute(
             `SELECT is_verified FROM mentors 
              WHERE user_id = (SELECT id FROM users WHERE email = ?)`,
             [session.user.email]
         ) as any[];
-
-        await connection.end();
 
         if (mentors.length > 0) {
             return NextResponse.json({

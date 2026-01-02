@@ -1,21 +1,117 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import DashboardLayout from "@/components/DashboardLayout";
-import { GraduationCap } from "lucide-react";
+import { Loader2, CheckCircle, Users, Activity, Star } from "lucide-react";
+import Link from "next/link";
+
+interface Therapist {
+    id: number;
+    name: string;
+    designation: string;
+    headlines: string;
+    patients_treated: number;
+    image?: string;
+}
 
 export default function TherapistsPage() {
+    const [therapists, setTherapists] = useState<Therapist[]>([]);
+    const [loading, setLoading] = useState(true);
+
+    useEffect(() => {
+        async function fetchTherapists() {
+            try {
+                const res = await fetch("/api/therapist/list");
+                if (res.ok) {
+                    setTherapists(await res.json());
+                }
+            } catch (error) {
+                console.error("Failed to fetch therapists", error);
+            } finally {
+                setLoading(false);
+            }
+        }
+        fetchTherapists();
+    }, []);
+
     return (
         <DashboardLayout>
-            <div className="flex flex-col items-center justify-center min-h-[60vh] text-center space-y-4 animate-fade-in">
-                <div className="w-20 h-20 bg-brand-primary/10 rounded-full flex items-center justify-center text-brand-primary mb-4">
-                    <GraduationCap className="w-10 h-10" />
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+                <div className="mb-10 text-center md:text-left">
+                    <h1 className="text-3xl font-bold text-gray-900 mb-3">Find Your Therapist</h1>
+                    <p className="text-gray-600 max-w-2xl text-lg">
+                        Connect with verified professionals who can help you navigate life's challenges.
+                    </p>
                 </div>
-                <h1 className="text-3xl font-bold text-gray-900">Find a Therapist</h1>
-                <p className="text-gray-500 max-w-md">
-                    Connect with experienced therapists who can guide you through your journey.
-                    Book one-on-one sessions for personalized support.
-                </p>
-                <div className="mt-8 p-4 bg-white rounded-xl border border-brand-border text-sm text-gray-500">
-                    Coming Soon
-                </div>
+
+                {loading ? (
+                    <div className="flex justify-center items-center h-64">
+                        <Loader2 className="w-10 h-10 text-brand-primary animate-spin" />
+                    </div>
+                ) : therapists.length === 0 ? (
+                    <div className="text-center py-20 bg-gray-50 rounded-3xl border border-gray-100">
+                        <Users className="w-12 h-12 text-gray-300 mx-auto mb-4" />
+                        <h3 className="text-xl font-medium text-gray-900 mb-2">No therapists found</h3>
+                        <p className="text-gray-500">Check back soon as we are onboarding new professionals.</p>
+                    </div>
+                ) : (
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                        {therapists.map((therapist) => (
+                            <div key={therapist.id} className="bg-white rounded-3xl p-6 border border-gray-100 shadow-sm hover:shadow-xl transition-all duration-300 group">
+                                <div className="flex items-start justify-between mb-6">
+                                    <div className="relative">
+                                        <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 ring-4 ring-gray-50 group-hover:ring-blue-50 transition-all">
+                                            {therapist.image ? (
+                                                <img src={therapist.image} alt={therapist.name} className="w-full h-full object-cover" />
+                                            ) : (
+                                                <div className="w-full h-full flex items-center justify-center text-gray-400">
+                                                    <Users className="w-8 h-8" />
+                                                </div>
+                                            )}
+                                        </div>
+                                        <div className="absolute -bottom-1 -right-1 bg-white rounded-full p-1 shadow-sm">
+                                            <CheckCircle className="w-5 h-5 text-blue-500 fill-blue-500 text-white" />
+                                        </div>
+                                    </div>
+                                    <span className="bg-blue-50 text-blue-700 text-xs font-bold px-3 py-1.5 rounded-full uppercase tracking-wide">
+                                        Verified
+                                    </span>
+                                </div>
+
+                                <div className="mb-6">
+                                    <h3 className="text-xl font-bold text-gray-900 mb-1 group-hover:text-blue-600 transition-colors">
+                                        {therapist.name}
+                                    </h3>
+                                    <p className="text-gray-500 font-medium text-sm mb-3">{therapist.designation}</p>
+                                    <p className="text-gray-600 text-sm line-clamp-2 leading-relaxed h-[42px]">
+                                        {therapist.headlines}
+                                    </p>
+                                </div>
+
+                                <div className="flex items-center gap-4 mb-6 pt-6 border-t border-gray-50">
+                                    <div className="flex items-center gap-1.5">
+                                        <Activity className="w-4 h-4 text-forest-green" />
+                                        <span className="text-sm font-bold text-gray-900">{therapist.patients_treated}+</span>
+                                        <span className="text-xs text-gray-400 font-medium">Patients</span>
+                                    </div>
+                                    <div className="w-px h-8 bg-gray-100"></div>
+                                    <div className="flex items-center gap-1.5">
+                                        <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
+                                        <span className="text-sm font-bold text-gray-900">4.9</span>
+                                        <span className="text-xs text-gray-400 font-medium">Rating</span>
+                                    </div>
+                                </div>
+
+                                <Link
+                                    href={`/therapist/${therapist.id}`}
+                                    className="block w-full bg-gray-900 text-white text-center font-medium py-3.5 rounded-xl hover:bg-brand-primary transition-colors shadow-lg shadow-gray-200 hover:shadow-brand-primary/25"
+                                >
+                                    Book Session
+                                </Link>
+                            </div>
+                        ))}
+                    </div>
+                )}
             </div>
         </DashboardLayout>
     );

@@ -107,25 +107,52 @@ export default function TherapistOnboarding() {
 
     if (!session) {
         return (
-            <div className="min-h-screen bg-brand-bg flex flex-col items-center justify-center p-4">
-                <div className="text-center mb-8 animate-fade-in">
-                    <div className="w-20 h-20 bg-brand-primary/10 rounded-3xl flex items-center justify-center mx-auto mb-6">
-                        <Stethoscope className="w-10 h-10 text-brand-primary" />
+            <div className="min-h-screen bg-white flex flex-col md:flex-row">
+                {/* Left Side - Hero / Branding (Same as Login) */}
+                <div className="md:w-1/2 bg-blue-600 p-8 md:p-16 flex flex-col justify-between text-white relative overflow-hidden">
+                    <div className="relative z-10">
+                        <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8 shadow-inner">
+                            <img src="/better-talk-logo.png" alt="Logo" width="48" height="48" className="object-contain" />
+                        </div>
+                        <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
+                            Join as a <br />
+                            <span className="text-blue-200">Therapist.</span>
+                        </h1>
+                        <p className="text-blue-100 text-lg max-w-md leading-relaxed">
+                            Help us build a safer community. Share your expertise, manage your practice, and connect with those who need it most.
+                        </p>
                     </div>
-                    <h1 className="text-4xl font-bold text-gray-900 mb-4 tracking-tight">Join as a Therapist</h1>
-                    <p className="text-gray-500 max-w-md mx-auto text-lg">
-                        Help us build a safer community. Share your expertise and connect with those who need it most.
-                    </p>
+
+                    <div className="relative z-10 mt-12 md:mt-0">
+                        <p className="text-sm text-blue-200">Trusted by 500+ professionals</p>
+                    </div>
+
+                    <div className="absolute top-0 right-0 w-64 h-64 bg-blue-500 rounded-full blur-3xl opacity-50 -translate-y-1/2 translate-x-1/2"></div>
+                    <div className="absolute bottom-0 left-0 w-96 h-96 bg-blue-700 rounded-full blur-3xl opacity-50 translate-y-1/3 -translate-x-1/3"></div>
                 </div>
 
-                <button
-                    onClick={() => signIn("google")}
-                    className="bg-white border-2 border-gray-100 hover:border-brand-primary/30 px-8 py-4 rounded-2xl flex items-center gap-4 transition-all hover:shadow-xl hover:shadow-brand-primary/10 group mb-8 w-full max-w-sm"
-                >
-                    <Image src="https://www.google.com/favicon.ico" alt="Google" width={24} height={24} />
-                    <span className="font-semibold text-gray-700 group-hover:text-brand-primary transition-colors">Continue with Google</span>
-                    <ArrowRight className="w-5 h-5 text-gray-300 group-hover:text-brand-primary ml-auto transition-colors" />
-                </button>
+                {/* Right Side - Action */}
+                <div className="md:w-1/2 p-8 md:p-16 flex items-center justify-center bg-gray-50">
+                    <div className="w-full max-w-md bg-white p-10 rounded-3xl shadow-xl border border-gray-100">
+                        <div className="text-center mb-10">
+                            <h2 className="text-2xl font-bold text-gray-900 mb-2">Start Your Journey</h2>
+                            <p className="text-gray-500">Apply to become a verified therapist</p>
+                        </div>
+
+                        <button
+                            onClick={() => signIn("google")}
+                            className="w-full flex items-center justify-center gap-3 bg-white border border-gray-200 p-4 rounded-xl hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm group mb-6"
+                        >
+                            <Image src="https://www.google.com/favicon.ico" alt="Google" width={24} height={24} />
+                            <span className="font-medium text-gray-700 group-hover:text-gray-900">Continue with Google</span>
+                            <ArrowRight className="w-4 h-4 text-gray-400 group-hover:translate-x-1 transition-transform ml-auto" />
+                        </button>
+
+                        <div className="text-center text-sm text-gray-400">
+                            <p>Already a therapist? <Link href="/therapist/login" className="text-blue-600 hover:underline">Login here</Link></p>
+                        </div>
+                    </div>
+                </div>
             </div>
         );
     }
@@ -154,44 +181,17 @@ export default function TherapistOnboarding() {
         )
     }
 
-    // If verified, show Therapist Dashboard (Initial View)
+    // If verified, redirect to proper dashboard
+    useEffect(() => {
+        if (isVerified) {
+            router.replace('/therapist/dashboard');
+        }
+    }, [isVerified, router]);
+
     if (isVerified) {
         return (
-            <div className="min-h-screen bg-brand-bg py-12 px-4">
-                <div className="max-w-4xl mx-auto">
-                    <div className="bg-white p-8 rounded-3xl shadow-xl shadow-brand-primary/5 mb-8">
-                        <div className="flex items-center gap-6">
-                            <div className="w-20 h-20 bg-green-100 rounded-full flex items-center justify-center flex-shrink-0">
-                                <Stethoscope className="w-10 h-10 text-green-600" />
-                            </div>
-                            <div>
-                                <h1 className="text-3xl font-bold text-gray-900">Welcome, Dr. {session.user?.name}</h1>
-                                <div className="flex items-center gap-2 mt-2">
-                                    <span className="px-3 py-1 bg-green-100 text-green-700 rounded-full text-sm font-semibold flex items-center gap-1">
-                                        <CheckCircle className="w-3 h-3" /> Verified Therapist
-                                    </span>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <h3 className="font-bold text-lg mb-2">Your Sessions</h3>
-                            <p className="text-gray-500 text-sm mb-4">You have no upcoming sessions.</p>
-                            <button className="text-brand-primary font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all">
-                                View Schedule <ArrowRight className="w-4 h-4" />
-                            </button>
-                        </div>
-                        <div className="bg-white p-6 rounded-2xl shadow-sm border border-gray-100 hover:shadow-md transition-shadow">
-                            <h3 className="font-bold text-lg mb-2">Patient Requests</h3>
-                            <p className="text-gray-500 text-sm mb-4">No new patient requests.</p>
-                            <button className="text-brand-primary font-medium text-sm flex items-center gap-1 hover:gap-2 transition-all">
-                                View All <ArrowRight className="w-4 h-4" />
-                            </button>
-                        </div>
-                    </div>
-                </div>
+            <div className="h-screen flex items-center justify-center bg-brand-bg">
+                <Loader2 className="w-8 h-8 text-brand-primary animate-spin" />
             </div>
         );
     }

@@ -3,20 +3,13 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
-import { Users, LayoutDashboard, Menu, X, LogOut, Home, GraduationCap, Clock, User } from "lucide-react";
+import { User, LogOut, Users, Stethoscope, Calendar, Clock, LayoutDashboard, GraduationCap, Video } from "lucide-react";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 
 interface DashboardLayoutProps {
     children: React.ReactNode;
 }
-
-const NAV_ITEMS = [
-    { label: "Community", href: "/groups", icon: Users },
-    { label: "Therapists", href: "/therapists", icon: GraduationCap },
-    { label: "Sessions", href: "/sessions", icon: Clock },
-    { label: "Profile", href: "/profile", icon: LayoutDashboard },
-];
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname();
@@ -28,43 +21,70 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     useEffect(() => {
         if (session?.user && (session.user as any).role === 'mentor' && !(session.user as any).is_verified) {
-            router.push('/therapist');
+            // If unverified mentor is NOT on therapist page AND NOT on schedule page (allow schedule? maybe not until verified)
+            // Actually, the requirements imply they can login but only see status if unverified.
+            // If verified, they have access to dashboard features.
+            // For now, if unverified, keep redirecting to /therapist
+            const isTherapistPage = pathname.startsWith('/therapist');
+            if (!isTherapistPage) {
+                router.replace('/therapist');
+            }
         }
-    }, [session, router]);
+    }, [session, pathname, router]);
+
+
+    const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
+
+    // Define Navigation Items
+    let navItems = [
+        { label: "Community", href: "/groups", icon: Users },
+        { label: "Therapists", href: "/therapists", icon: Stethoscope },
+        { label: "Sessions", href: "/sessions", icon: Video },
+        { label: "Profile", href: "/profile", icon: User },
+    ];
+
+    // If Mentor (Verified), Override Items
+    if (session?.user && (session.user as any).role === 'mentor' && (session.user as any).is_verified) {
+        navItems = [
+            { label: "Community", href: "/groups", icon: Users },
+            { label: "Sessions", href: "/sessions", icon: Calendar },
+            { label: "Profile", href: "/profile", icon: User },
+            { label: "Schedule", href: "/therapist/schedule", icon: Clock },
+        ];
+    }
 
     // Continue rendering...
     return (
-        <div className="flex h-screen bg-warm-sand overflow-hidden">
-            {/* Desktop Sidebar */}
-            <aside className="hidden md:flex flex-col w-64 bg-white border-r border-soft-clay/30">
-                <div className="p-6 flex items-center gap-3">
-                    <div className="relative w-8 h-8">
-                        <Image src="/better-talk-logo.png" alt="Logo" fill className="object-contain" />
-                    </div>
-                    <span className="font-semibold text-xl text-forest-green tracking-tight">Better Talk</span>
+        <div className="flex h-screen bg-brand-bg md:overflow-hidden overflow-hidden">
+            {/* Sidebar (Desktop) */}
+            <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-100">
+                <div className="p-8">
+                    <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-primary to-blue-600 bg-clip-text text-transparent">
+                        BetterTalk
+                    </h1>
                 </div>
 
-                <nav className="flex-1 px-4 py-4 space-y-2">
-                    {NAV_ITEMS.map((item) => {
-                        const isActive = pathname.startsWith(item.href);
+                <nav className="flex-1 px-4 space-y-2">
+                    {navItems.map((item) => {
+                        const active = isActive(item.href);
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all ${isActive
-                                    ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/20"
-                                    : "text-gray-500 hover:bg-white/50 hover:text-brand-primary"
+                                className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${active
+                                    ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/25 translate-x-1"
+                                    : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1"
                                     }`}
                             >
-                                <item.icon className="w-5 h-5" />
-                                {item.label}
+                                <item.icon className={`w-5 h-5 ${active ? "text-white" : "text-gray-400 group-hover:text-gray-900"}`} />
+                                <span className="font-medium">{item.label}</span>
                             </Link>
                         );
                     })}
                 </nav>
 
-                <div className="p-4 border-t border-soft-clay/30">
-                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-soft-clay/20">
+                <div className="p-4 border-t border-gray-100">
+                    <div className="flex items-center gap-3 px-4 py-3 rounded-xl bg-gray-50">
                         <div className="relative w-8 h-8 rounded-full overflow-hidden bg-gray-200">
                             {session?.user?.image ? (
                                 <Image src={session.user.image} alt="Profile" fill className="object-cover" />
@@ -86,15 +106,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </aside>
 
             {/* Main Content */}
-            <main className={`flex-1 relative bg-warm-sand overflow-x-hidden ${isGroupDetail ? 'overflow-y-hidden h-full flex flex-col' : 'overflow-y-auto'}`}>
+            <main className={`flex-1 relative bg-brand-bg md:overflow-hidden overflow-x-hidden ${isGroupDetail ? 'overflow-y-hidden h-full flex flex-col' : 'overflow-y-auto'}`}>
                 {/* Mobile Header - Hidden on Group Detail */}
                 {!isGroupDetail && (
-                    <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-soft-clay/30 px-4 py-3 flex items-center justify-between">
+                    <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
-                            <div className="relative w-8 h-8">
-                                <Image src="/better-talk-logo.png" alt="Logo" fill className="object-contain" />
-                            </div>
-                            <span className="font-semibold text-lg text-forest-green">Better Talk</span>
+                            <h1 className="text-lg font-bold bg-gradient-to-r from-brand-primary to-blue-600 bg-clip-text text-transparent">
+                                BetterTalk
+                            </h1>
                         </div>
 
                         {/* Mobile Profile Menu */}
@@ -118,20 +137,20 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                         className="fixed inset-0 z-30"
                                         onClick={() => setIsProfileMenuOpen(false)}
                                     />
-                                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-soft-clay/50 z-40 overflow-hidden animate-fade-in flex flex-col py-2">
+                                    <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 z-40 overflow-hidden animate-fade-in flex flex-col py-2">
                                         <Link
                                             href="/profile"
                                             onClick={() => setIsProfileMenuOpen(false)}
-                                            className="px-4 py-3 hover:bg-brand-bg flex items-center gap-3 text-gray-700 font-medium"
+                                            className="px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-gray-700 font-medium"
                                         >
                                             <User className="w-5 h-5 text-brand-primary" /> Profile
                                         </Link>
                                         <Link
                                             href="/therapists"
                                             onClick={() => setIsProfileMenuOpen(false)}
-                                            className="px-4 py-3 hover:bg-brand-bg flex items-center gap-3 text-gray-700 font-medium"
+                                            className="px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-gray-700 font-medium"
                                         >
-                                            <GraduationCap className="w-5 h-5 text-brand-primary" /> Book A Session
+                                            <Stethoscope className="w-5 h-5 text-brand-primary" /> Book A Session
                                         </Link>
                                         <div className="h-px bg-gray-100 my-1" />
                                         <button
@@ -153,18 +172,18 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </main>
 
             {/* Mobile Bottom Navigation */}
-            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-soft-clay/30 pb-safe z-30 shadow-[0_-1px_10px_rgba(0,0,0,0.05)]">
+            <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 pb-safe z-30 shadow-[0_-1px_10px_rgba(0,0,0,0.05)]">
                 <div className="flex justify-around items-center h-16">
-                    {NAV_ITEMS.map((item) => {
-                        const isActive = pathname.startsWith(item.href);
+                    {navItems.map((item) => {
+                        const active = isActive(item.href);
                         return (
                             <Link
                                 key={item.href}
                                 href={item.href}
-                                className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${isActive ? "text-brand-primary" : "text-gray-400"
+                                className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${active ? "text-brand-primary" : "text-gray-400"
                                     }`}
                             >
-                                <item.icon className={`w-5 h-5 ${isActive ? "fill-current" : ""}`} />
+                                <item.icon className={`w-5 h-5 ${active ? "fill-current" : ""}`} />
                                 <span className="text-[10px] font-medium">{item.label}</span>
                             </Link>
                         );

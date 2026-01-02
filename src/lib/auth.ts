@@ -1,3 +1,4 @@
+import pool from "@/lib/db";
 import { NextAuthOptions } from "next-auth";
 import GoogleProvider from "next-auth/providers/google";
 
@@ -16,36 +17,30 @@ export const authOptions: NextAuthOptions = {
                 (session.user as any).id = token.sub;
 
                 try {
-                    const mysql = require('mysql2/promise');
-                    const connection = await mysql.createConnection({
-                        host: process.env.DB_HOST,
-                        user: process.env.DB_USER,
-                        password: process.env.DB_PASSWORD,
-                        database: process.env.DB_NAME,
-                    });
-
-                    const [rows] = await connection.execute(
-                        "SELECT id, role, is_active FROM users WHERE email = ?",
+                    const [rows] = await pool.execute(
+                        "SELECT id, name, role, is_active FROM users WHERE email = ?",
                         [session.user.email]
-                    );
+                    ) as any[];
 
                     if (rows.length > 0) {
                         const user = rows[0];
                         (session.user as any).db_id = user.id;
                         (session.user as any).role = user.role;
+                        if (user.name) {
+                            session.user.name = user.name;
+                        }
 
                         // If mentor, check verification status
                         if (user.role === 'mentor') {
-                            const [mentorRows] = await connection.execute(
+                            const [mentorRows] = await pool.execute(
                                 "SELECT is_verified FROM mentors WHERE user_id = ?",
                                 [user.id]
-                            );
+                            ) as any[];
                             if (mentorRows.length > 0) {
                                 (session.user as any).is_verified = mentorRows[0].is_verified;
                             }
                         }
                     }
-                    await connection.end();
 
                 } catch (error) {
                     console.error("Auth session error:", error);

@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import mysql from "mysql2/promise";
+import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
 
@@ -13,41 +13,38 @@ export async function POST(
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const connection = await mysql.createConnection({
-            host: process.env.DB_HOST,
-            user: process.env.DB_USER,
-            password: process.env.DB_PASSWORD,
-            database: process.env.DB_NAME,
-        });
-
-        const [userRows] = await connection.execute(
+        const [userRows] = await pool.execute(
             "SELECT id FROM users WHERE email = ?",
             [session.user?.email]
-        );
-        const userId = (userRows as any)[0].id;
+        ) as any[];
+
+        if (!userRows || userRows.length === 0) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        const userId = userRows[0].id;
         const postId = params.id;
 
         // Check if upvote exists
-        const [existing] = await connection.execute(
+        const [existing] = await pool.execute(
             "SELECT id FROM post_upvotes WHERE post_id = ? AND user_id = ?",
             [postId, userId]
-        );
+        ) as any[];
 
-        if ((existing as any).length > 0) {
+
+        if (existing.length > 0) {
             // Remove upvote
-            await connection.execute(
+            await pool.execute(
                 "DELETE FROM post_upvotes WHERE post_id = ? AND user_id = ?",
                 [postId, userId]
             );
-            await connection.end();
             return NextResponse.json({ upvoted: false });
         } else {
             // Add upvote
-            await connection.execute(
+            await pool.execute(
                 "INSERT INTO post_upvotes (post_id, user_id) VALUES (?, ?)",
                 [postId, userId]
             );
-            await connection.end();
             return NextResponse.json({ upvoted: true });
         }
 
