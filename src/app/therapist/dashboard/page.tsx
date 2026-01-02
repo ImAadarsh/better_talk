@@ -46,7 +46,7 @@ export default function TherapistDashboard() {
                     <h1 className="text-3xl font-bold text-gray-900">
                         Welcome back, {session?.user?.name}
                     </h1>
-                    <p className="text-gray-500 mt-1">Here's what's happening regarding your appointments.</p>
+                    <p className="text-gray-500">Here&apos;s what&apos;s happening today.</p>
                 </header>
 
                 {loading ? (

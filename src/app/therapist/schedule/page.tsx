@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useSession } from "next-auth/react";
 import { format, addMinutes, parse, isBefore, startOfDay } from "date-fns";
 import { Calendar, Clock, Loader2, Save, CheckCircle, Plus, Trash2, ChevronDown } from "lucide-react";
@@ -42,25 +42,8 @@ export default function TherapistSchedulePage() {
     const [datesWithSlots, setDatesWithSlots] = useState<string[]>([]);
     const [selectedDateFromDropdown, setSelectedDateFromDropdown] = useState("");
 
-    // Fetch dates with slots on mount
-    useEffect(() => {
-        if (status === "authenticated") {
-            fetchDatesWithSlots();
-        }
-    }, [status]);
-
-    // Fetch existing slots when date changes
-    useEffect(() => {
-        if (status === "authenticated" && date) {
-            fetchExistingSlots();
-        }
-    }, [date, status]);
-
-    const fetchDatesWithSlots = async () => {
-        // Implement an API to get distinct dates or just fetch a range?
-        // For simplicity, let's assume we fetch a month range or similar in future.
-        // But the user specifically asked for "drop of the dates which has the slots".
-        // Let's add an endpoint ?mode=dates to fetch distinct available dates.
+    // Callback definitions
+    const fetchDatesWithSlots = useCallback(async () => {
         try {
             const res = await fetch(`/api/therapist/slots?mode=dates`);
             if (res.ok) {
@@ -70,12 +53,11 @@ export default function TherapistSchedulePage() {
         } catch (e) {
             console.error(e);
         }
-    }
+    }, []);
 
-    const fetchExistingSlots = async () => {
+    const fetchExistingSlots = useCallback(async () => {
         setLoading(true);
         try {
-            // Fetch for the selected day
             const startOfDayStr = new Date(date).toISOString();
             const endOfDayStr = new Date(new Date(date).setHours(23, 59, 59)).toISOString();
 
@@ -89,7 +71,22 @@ export default function TherapistSchedulePage() {
         } finally {
             setLoading(false);
         }
-    };
+    }, [date]);
+
+    // Fetch dates with slots on mount
+    useEffect(() => {
+        if (status === "authenticated") {
+            fetchDatesWithSlots();
+        }
+    }, [status, fetchDatesWithSlots]);
+
+    // Fetch existing slots when date changes
+    useEffect(() => {
+        if (status === "authenticated" && date) {
+            fetchExistingSlots();
+        }
+    }, [date, status, fetchExistingSlots]);
+
 
     const handleGenerate = () => {
         const slots = generateSlots(date, startTime, endTime, duration);

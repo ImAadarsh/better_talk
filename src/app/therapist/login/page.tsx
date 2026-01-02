@@ -29,7 +29,7 @@ export default function TherapistLoginPage() {
             <div className="md:w-1/2 bg-blue-600 p-8 md:p-16 flex flex-col justify-between text-white relative overflow-hidden">
                 <div className="relative z-10">
                     <div className="w-20 h-20 bg-white/20 backdrop-blur-sm rounded-2xl flex items-center justify-center mb-8 shadow-inner">
-                        <img src="/better-talk-logo.png" alt="Logo" width="48" height="48" className="object-contain" />
+                        <Image src="/better-talk-logo.png" alt="Logo" width={48} height={48} className="object-contain" />
                     </div>
                     <h1 className="text-4xl md:text-5xl font-bold mb-6 leading-tight">
                         Empower Lives through <br />

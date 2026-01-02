@@ -19,7 +19,7 @@ export default function RegisterPage() {
             <div className="w-full max-w-md bg-white/80 backdrop-blur-xl p-8 rounded-3xl shadow-[0_8px_40px_-12px_rgba(0,0,0,0.1)] border border-white/50 animate-slide-up relative z-10">
                 <div className="text-center space-y-3 mb-10">
                     <div className="w-20 h-20 bg-brand-primary/10 rounded-2xl rotate-3 flex items-center justify-center mx-auto mb-6 shadow-sm">
-                        <img src="/better-talk-logo.png" alt="Logo" width="48" height="48" className="-rotate-3" />
+                        <Image src="/better-talk-logo.png" alt="Logo" width={48} height={48} className="-rotate-3" />
                     </div>
                     <h1 className="text-3xl font-bold text-brand-text tracking-tight">Create Account</h1>
                     <p className="text-gray-500 text-sm">Join the conversation with your community</p>

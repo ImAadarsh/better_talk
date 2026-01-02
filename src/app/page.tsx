@@ -3,19 +3,20 @@
 import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import LoginScreen from "@/components/LoginScreen";
+import LandingPage from "@/components/LandingPage";
 import OnboardingScreen from "@/components/OnboardingScreen";
 import { Loader2 } from "lucide-react";
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const [view, setView] = useState<"loading" | "login" | "onboarding" | "dashboard">("loading");
+  const [view, setView] = useState<"loading" | "landing" | "onboarding" | "dashboard">("loading");
 
   useEffect(() => {
     async function checkUser() {
       if (status === "loading") return;
 
       if (status === "unauthenticated") {
-        setView("login");
+        setView("landing");
         return;
       }
 
@@ -51,8 +52,8 @@ export default function Home() {
     );
   }
 
-  if (view === "login") {
-    return <LoginScreen />;
+  if (view === "landing") {
+    return <LandingPage />;
   }
 
   if (view === "onboarding") {

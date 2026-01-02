@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Loader2, CheckCircle, Users, Activity, Star } from "lucide-react";
 import Link from "next/link";
@@ -40,7 +41,7 @@ export default function TherapistsPage() {
                 <div className="mb-10 text-center md:text-left">
                     <h1 className="text-3xl font-bold text-gray-900 mb-3">Find Your Therapist</h1>
                     <p className="text-gray-600 max-w-2xl text-lg">
-                        Connect with verified professionals who can help you navigate life's challenges.
+                        Connect with verified professionals who can help you navigate life&apos;s challenges.
                     </p>
                 </div>
 
@@ -62,7 +63,7 @@ export default function TherapistsPage() {
                                     <div className="relative">
                                         <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 ring-4 ring-gray-50 group-hover:ring-blue-50 transition-all">
                                             {therapist.image ? (
-                                                <img src={therapist.image} alt={therapist.name} className="w-full h-full object-cover" />
+                                                <Image src={therapist.image} alt={therapist.name} width={80} height={80} className="w-full h-full object-cover" unoptimized />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                                                     <Users className="w-8 h-8" />

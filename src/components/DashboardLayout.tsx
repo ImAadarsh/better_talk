@@ -21,7 +21,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     useEffect(() => {
         if (session?.user && (session.user as any).role === 'mentor' && !(session.user as any).is_verified) {
-            // If unverified mentor is NOT on therapist page AND NOT on schedule page (allow schedule? maybe not until verified)
+            // If unverified Therapist is NOT on therapist page AND NOT on schedule page (allow schedule? maybe not until verified)
             // Actually, the requirements imply they can login but only see status if unverified.
             // If verified, they have access to dashboard features.
             // For now, if unverified, keep redirecting to /therapist

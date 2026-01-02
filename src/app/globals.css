@@ -3,18 +3,235 @@
 @tailwind utilities;
 
 :root {
-  --foreground-rgb: 30, 41, 59;
-  --background-start-rgb: 248, 250, 252;
-  --background-end-rgb: 248, 250, 252;
+  --foreground-rgb: 0, 0, 0;
+  --background-start-rgb: 214, 219, 220;
+  --background-end-rgb: 255, 255, 255;
+  --brand-primary: #4F46E5;
+  /* Indigo-600 */
+  --brand-secondary: #06B6D4;
+  /* Cyan-500 */
+}
+
+@media (prefers-color-scheme: dark) {
+  :root {
+    --foreground-rgb: 255, 255, 255;
+    --background-start-rgb: 0, 0, 0;
+    --background-end-rgb: 0, 0, 0;
+  }
 }
 
 body {
   color: rgb(var(--foreground-rgb));
-  background: rgb(var(--background-start-rgb));
+  background: white;
+  overflow-x: hidden;
 }
 
 @layer utilities {
   .text-balance {
     text-wrap: balance;
   }
+}
+
+/* Custom Animations */
+@keyframes snake-1 {
+  0% {
+    stroke-dasharray: 0 1000;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 500 1000;
+    stroke-dashoffset: -250;
+  }
+
+  100% {
+    stroke-dasharray: 1000 1000;
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes snake-2 {
+  0% {
+    stroke-dasharray: 0 1000;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 500 1000;
+    stroke-dashoffset: -500;
+  }
+
+  100% {
+    stroke-dasharray: 1000 1000;
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes snake-3 {
+  0% {
+    stroke-dasharray: 0 1000;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 500 1000;
+    stroke-dashoffset: -750;
+  }
+
+  100% {
+    stroke-dasharray: 1000 1000;
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes snake-vertical-1 {
+  0% {
+    stroke-dasharray: 0 1000;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 400 1000;
+    stroke-dashoffset: -200;
+  }
+
+  100% {
+    stroke-dasharray: 1000 1000;
+    stroke-dashoffset: -1000;
+  }
+}
+
+@keyframes snake-vertical-2 {
+  0% {
+    stroke-dasharray: 0 1000;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 400 1000;
+    stroke-dashoffset: -600;
+  }
+
+  100% {
+    stroke-dasharray: 1000 1000;
+    stroke-dashoffset: -1000;
+  }
+}
+
+.animate-snake-1 {
+  animation: snake-1 8s ease-in-out infinite;
+}
+
+.animate-snake-2 {
+  animation: snake-2 10s ease-in-out infinite;
+  animation-delay: 1s;
+}
+
+.animate-snake-3 {
+  animation: snake-3 12s ease-in-out infinite;
+  animation-delay: 2s;
+}
+
+.animate-snake-vertical-1 {
+  animation: snake-vertical-1 6s ease-in-out infinite;
+  animation-delay: 0.5s;
+}
+
+.animate-snake-vertical-2 {
+  animation: snake-vertical-2 7s ease-in-out infinite;
+  animation-delay: 1.5s;
+}
+
+/* Gradient animation for text */
+@keyframes gradient {
+
+  0%,
+  100% {
+    background-position: 0% 50%;
+  }
+
+  50% {
+    background-position: 100% 50%;
+  }
+}
+
+.animate-pulse-slow {
+  animation: pulse 4s cubic-bezier(0.4, 0, 0.6, 1) infinite;
+}
+
+.animate-gradient {
+  background-size: 200% auto;
+  animation: gradient 3s ease infinite;
+}
+
+/* Ring Particles Animation */
+@property --animation-tick {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@property --ring-radius {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 100;
+}
+
+@property --ring-x {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 50;
+}
+
+@property --ring-y {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 50;
+}
+
+@property --ring-interactive {
+  syntax: '<number>';
+  inherits: false;
+  initial-value: 0;
+}
+
+@keyframes ripple {
+  0% {
+    --animation-tick: 0;
+  }
+
+  100% {
+    --animation-tick: 1;
+  }
+}
+
+@keyframes ring {
+  0% {
+    --ring-radius: 150;
+  }
+
+  100% {
+    --ring-radius: 250;
+  }
+}
+
+#welcome {
+  --ring-radius: 100;
+  --ring-thickness: 600;
+  --particle-count: 80;
+  --particle-rows: 25;
+  --particle-size: 2;
+  --particle-color: #4F46E5;
+  /* Indigo-600 */
+  --particle-min-alpha: 0.1;
+  --particle-max-alpha: 1.0;
+  --seed: 200;
+
+  background-image: paint(ring-particles);
+  animation: ripple 6s linear infinite, ring 6s ease-in-out infinite alternate;
+  transition: --ring-x 3s ease, --ring-y 3s ease;
+}
+
+#welcome.interactive {
+  transition: --ring-x 0.5s ease, --ring-y 0.5s ease;
 }

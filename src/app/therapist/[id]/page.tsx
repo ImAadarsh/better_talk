@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Loader2, CheckCircle, MapPin, Calendar, Clock, ChevronLeft, ChevronRight, Star, Activity, ShieldCheck, Users } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
@@ -103,7 +104,7 @@ export default function TherapistProfilePage() {
                     <div className="relative shrink-0 mx-auto md:mx-0">
                         <div className="w-32 h-32 md:w-40 md:h-40 rounded-full overflow-hidden ring-4 ring-gray-50 bg-gray-100">
                             {therapist.image ? (
-                                <img src={therapist.image} alt={therapist.name} className="w-full h-full object-cover" />
+                                <Image src={therapist.image} alt={therapist.name} width={160} height={160} className="w-full h-full object-cover" unoptimized />
                             ) : (
                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                                     <ShieldCheck className="w-16 h-16" />

@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
 import { Loader2, Calendar, Clock, Video, User, MoreVertical } from "lucide-react";
 import { format, isPast, parseISO } from "date-fns";
@@ -55,8 +56,8 @@ export default function SessionsPage() {
                     <button
                         onClick={() => setActiveTab('upcoming')}
                         className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'upcoming'
-                                ? "bg-white text-gray-900 shadow-sm"
-                                : "text-gray-500 hover:text-gray-700"
+                            ? "bg-white text-gray-900 shadow-sm"
+                            : "text-gray-500 hover:text-gray-700"
                             }`}
                     >
                         Upcoming
@@ -64,8 +65,8 @@ export default function SessionsPage() {
                     <button
                         onClick={() => setActiveTab('past')}
                         className={`px-6 py-2.5 rounded-lg text-sm font-medium transition-all ${activeTab === 'past'
-                                ? "bg-white text-gray-900 shadow-sm"
-                                : "text-gray-500 hover:text-gray-700"
+                            ? "bg-white text-gray-900 shadow-sm"
+                            : "text-gray-500 hover:text-gray-700"
                             }`}
                     >
                         Past History
@@ -117,7 +118,7 @@ export default function SessionsPage() {
                                     <div className="flex items-center justify-center md:justify-start gap-3 mt-3">
                                         <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
                                             {session.other_party_image ? (
-                                                <img src={session.other_party_image} alt={session.other_party_name} className="w-full h-full object-cover" />
+                                                <Image src={session.other_party_image} alt={session.other_party_name} width={32} height={32} className="w-full h-full object-cover" unoptimized />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                                                     <User className="w-4 h-4" />

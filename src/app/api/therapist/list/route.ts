@@ -1,5 +1,7 @@
 
 import { NextResponse } from "next/server";
+
+export const dynamic = 'force-dynamic';
 import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -11,7 +13,7 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Fetch all verified mentors
+        // Fetch all verified Therapists
         const [rows] = await pool.execute(
             `SELECT m.id, u.name, m.designation, m.headlines, m.patients_treated, u.image 
              FROM mentors m 

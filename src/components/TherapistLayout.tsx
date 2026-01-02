@@ -2,8 +2,8 @@
 
 import { useState } from "react";
 import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
-import { LayoutDashboard, Calendar, Clock, User, LogOut, Menu, X, GraduationCap, Users } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { LayoutDashboard, Calendar, Clock, User, LogOut, Users, Menu, X, ChevronDown, Bell } from "lucide-react";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
 
@@ -22,7 +22,7 @@ const NAV_ITEMS = [
 export default function TherapistLayout({ children }: TherapistLayoutProps) {
     const pathname = usePathname();
     const { data: session } = useSession();
-    const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+    const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
 
     const isActive = (path: string) => pathname === path || pathname.startsWith(`${path}/`);
 
@@ -33,7 +33,7 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
                 <div className="p-8">
                     <div className="flex items-center gap-3">
                         <div className="relative w-10 h-10">
-                            <img src="/better-talk-logo.png" alt="Logo" className="object-contain w-full h-full" />
+                            <Image src="/better-talk-logo.png" alt="Logo" width={40} height={40} className="object-contain w-full h-full" />
                         </div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">
                             Therapist<span className="text-blue-600">Portal</span>
@@ -84,58 +84,86 @@ export default function TherapistLayout({ children }: TherapistLayoutProps) {
 
             {/* Mobile Header & Content */}
             <div className="flex-1 flex flex-col h-full relative">
+
                 {/* Mobile Header */}
                 <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-blue-100 px-4 py-3 flex items-center justify-between">
                     <div className="flex items-center gap-3">
                         <div className="relative w-8 h-8">
-                            <img src="/better-talk-logo.png" alt="Logo" className="object-contain w-full h-full" />
+                            <Image src="/better-talk-logo.png" alt="Logo" width={32} height={32} className="object-contain w-full h-full" />
                         </div>
                         <span className="font-bold text-gray-900">Therapist Portal</span>
                     </div>
-                    <button
-                        onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)}
-                        className="p-2 text-gray-600 hover:bg-gray-100 rounded-full"
-                    >
-                        {isMobileMenuOpen ? <X className="w-6 h-6" /> : <Menu className="w-6 h-6" />}
-                    </button>
+
+                    {/* Profile Dropdown */}
+                    <div className="relative">
+                        <button
+                            onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
+                            className="relative w-9 h-9 rounded-full overflow-hidden border border-blue-200 ring-2 ring-blue-50"
+                        >
+                            {session?.user?.image ? (
+                                <Image src={session.user.image} alt="Profile" fill className="object-cover" />
+                            ) : (
+                                <div className="w-full h-full bg-blue-100 flex items-center justify-center text-blue-600">
+                                    <User className="w-5 h-5" />
+                                </div>
+                            )}
+                        </button>
+
+                        {isProfileMenuOpen && (
+                            <>
+                                <div
+                                    className="fixed inset-0 z-30"
+                                    onClick={() => setIsProfileMenuOpen(false)}
+                                />
+                                <div className="absolute right-0 top-full mt-2 w-56 bg-white rounded-2xl shadow-xl border border-gray-100 z-40 overflow-hidden animate-fade-in flex flex-col py-2">
+                                    <div className="px-4 py-3 border-b border-gray-50">
+                                        <p className="text-sm font-medium text-gray-900 truncate">{session?.user?.name}</p>
+                                        <p className="text-xs text-gray-500 truncate">{session?.user?.email}</p>
+                                    </div>
+                                    <Link
+                                        href="/therapist/profile"
+                                        onClick={() => setIsProfileMenuOpen(false)}
+                                        className="px-4 py-3 hover:bg-gray-50 flex items-center gap-3 text-gray-700 font-medium"
+                                    >
+                                        <User className="w-5 h-5 text-blue-500" /> My Profile
+                                    </Link>
+                                    <div className="h-px bg-gray-100 my-1" />
+                                    <button
+                                        onClick={() => signOut({ callbackUrl: '/therapist/login' })}
+                                        className="px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-red-500 font-medium w-full text-left"
+                                    >
+                                        <LogOut className="w-5 h-5" /> Sign Out
+                                    </button>
+                                </div>
+                            </>
+                        )}
+                    </div>
                 </div>
 
-                {/* Mobile Menu Overlay */}
-                {isMobileMenuOpen && (
-                    <div className="md:hidden absolute inset-0 z-10 bg-white animate-fade-in pt-16 px-4">
-                        <nav className="space-y-2 mt-4">
-                            {NAV_ITEMS.map((item) => {
-                                const active = isActive(item.href);
-                                return (
-                                    <Link
-                                        key={item.href}
-                                        href={item.href}
-                                        onClick={() => setIsMobileMenuOpen(false)}
-                                        className={`flex items-center gap-3 px-4 py-4 rounded-xl transition-all ${active
-                                            ? "bg-blue-600 text-white shadow-md"
-                                            : "text-gray-600 hover:bg-gray-50"
-                                            }`}
-                                    >
-                                        <item.icon className="w-5 h-5" />
-                                        <span className="font-medium">{item.label}</span>
-                                    </Link>
-                                );
-                            })}
-                            <button
-                                onClick={() => signOut({ callbackUrl: '/therapist/login' })}
-                                className="flex items-center gap-3 px-4 py-4 rounded-xl text-red-500 hover:bg-red-50 w-full mt-4"
-                            >
-                                <LogOut className="w-5 h-5" />
-                                <span className="font-medium">Sign Out</span>
-                            </button>
-                        </nav>
-                    </div>
-                )}
-
                 {/* Main Content Area */}
-                <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-20 md:pb-8">
+                <main className="flex-1 overflow-y-auto p-4 md:p-8 pb-24 md:pb-8">
                     {children}
                 </main>
+
+                {/* Mobile Bottom Navigation */}
+                <nav className="md:hidden fixed bottom-0 left-0 w-full bg-white border-t border-gray-100 pb-safe z-30 shadow-[0_-1px_10px_rgba(0,0,0,0.05)]">
+                    <div className="flex justify-around items-center h-16">
+                        {NAV_ITEMS.map((item) => {
+                            const active = isActive(item.href);
+                            return (
+                                <Link
+                                    key={item.href}
+                                    href={item.href}
+                                    className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${active ? "text-blue-600" : "text-gray-400"
+                                        }`}
+                                >
+                                    <item.icon className={`w-5 h-5 ${active ? "fill-current" : ""}`} />
+                                    <span className="text-[10px] font-medium">{item.label}</span>
+                                </Link>
+                            );
+                        })}
+                    </div>
+                </nav>
             </div>
         </div>
     );
