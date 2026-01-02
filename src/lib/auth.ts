@@ -11,10 +11,28 @@ export const authOptions: NextAuthOptions = {
     ],
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
+        async jwt({ token, user, account, profile }) {
+            if (user) {
+                try {
+                    const [rows] = await pool.execute(
+                        "SELECT role FROM users WHERE email = ?",
+                        [user.email]
+                    ) as any[];
+
+                    if (rows.length > 0) {
+                        (token as any).role = rows[0].role;
+                    }
+                } catch (error) {
+                    console.error("JWT role fetch error:", error);
+                }
+            }
+            return token;
+        },
         async session({ session, token }) {
             if (session.user && token.sub) {
                 // Pass the sub (google id) to the client
                 (session.user as any).id = token.sub;
+                (session.user as any).role = (token as any).role;
 
                 try {
                     const [rows] = await pool.execute(
@@ -48,5 +66,6 @@ export const authOptions: NextAuthOptions = {
             }
             return session;
         },
+
     },
 };

@@ -7,17 +7,31 @@ export async function middleware(request: NextRequest) {
     const { pathname } = request.nextUrl;
 
     // Public paths that do not require auth
-    const publicPaths = ['/login', '/about', '/therapist', '/register', '/contact', '/stories'];
+    const publicPaths = ['/login', '/about', '/therapist', '/register', '/contact', '/stories', '/adx/login'];
     if (publicPaths.some(path => pathname.startsWith(path)) || pathname === '/') {
         return NextResponse.next();
     }
 
+
     // Check for auth
     if (!token) {
+        // If trying to access admin area, redirect to admin login
+        if (pathname.startsWith('/adx') && pathname !== '/adx/login') {
+            return NextResponse.redirect(new URL('/adx/login', request.url));
+        }
+
         const url = new URL('/', request.url);
         url.searchParams.set('callbackUrl', encodeURI(request.url));
         return NextResponse.redirect(url);
     }
+
+    // Role-based access for Admin area
+    if (pathname.startsWith('/adx') && pathname !== '/adx/login') {
+        if ((token as any).role !== 'admin') {
+            return NextResponse.redirect(new URL('/', request.url));
+        }
+    }
+
 
     // Access control for Therapists (Mentors)
     // We need to check the role from the token or session. 

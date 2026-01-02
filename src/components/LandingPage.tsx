@@ -9,6 +9,8 @@ import Footer from "@/components/Footer";
 
 export default function LandingPage() {
     const welcomeRef = useRef<HTMLElement>(null);
+    const [randomUsers, setRandomUsers] = useState<any[]>([]);
+
 
     useEffect(() => {
         if (typeof window !== "undefined" && "paintWorklet" in CSS) {
@@ -45,7 +47,22 @@ export default function LandingPage() {
             section.addEventListener("pointerleave", handlePointerLeave);
         }
 
+        // Fetch random users for social proof
+        const fetchRandomUsers = async () => {
+            try {
+                const res = await fetch("/api/public/random-users");
+                const data = await res.json();
+                if (data && Array.isArray(data) && data.length > 0) {
+                    setRandomUsers(data);
+                }
+            } catch (err) {
+                console.error("Error fetching random users:", err);
+            }
+        };
+        fetchRandomUsers();
+
         return () => {
+
             if (section) {
                 section.removeEventListener("pointermove", handlePointerMove);
                 section.removeEventListener("pointerleave", handlePointerLeave);
@@ -170,10 +187,28 @@ export default function LandingPage() {
                     >
                         <div className="flex items-center gap-2">
                             <div className="flex -space-x-3">
-                                {[1, 2, 3, 4].map(i => (
-                                    <div key={i} className="w-8 h-8 rounded-full bg-gray-200 border-2 border-white" />
-                                ))}
+                                {randomUsers.length > 0 ? (
+                                    randomUsers.map(user => (
+                                        <div key={user.id} className="w-9 h-9 rounded-full border-2 border-white overflow-hidden bg-gray-100 flex-shrink-0">
+                                            <img
+                                                src={user.avatar_url}
+                                                alt="Member"
+                                                className="w-full h-full object-cover"
+                                                onError={(e) => {
+                                                    (e.target as any).src = "https://ui-avatars.com/api/?name=User&background=random";
+                                                }}
+                                            />
+                                        </div>
+                                    ))
+                                ) : (
+                                    [1, 2, 3, 4, 5].map(i => (
+                                        <div key={i} className="w-9 h-9 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center overflow-hidden">
+                                            <img src={`https://ui-avatars.com/api/?name=${i}&background=random&color=fff`} alt="U" className="w-full h-full" />
+                                        </div>
+                                    ))
+                                )}
                             </div>
+
                             <div className="text-left">
                                 <p className="text-sm font-bold text-gray-900">10k+</p>
                                 <p className="text-xs text-gray-500">Members</p>
