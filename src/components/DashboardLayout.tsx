@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import { Users, LayoutDashboard, Menu, X, LogOut, Home, GraduationCap, Clock, User } from "lucide-react";
 import Image from "next/image";
 import { signOut, useSession } from "next-auth/react";
@@ -20,11 +20,19 @@ const NAV_ITEMS = [
 
 export default function DashboardLayout({ children }: DashboardLayoutProps) {
     const pathname = usePathname();
-    const { data: session } = useSession();
+    const { data: session, status } = useSession();
     const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false);
+    const router = useRouter();
 
     const isGroupDetail = /^\/groups\/\d+$/.test(pathname);
 
+    useEffect(() => {
+        if (session?.user && (session.user as any).role === 'mentor' && !(session.user as any).is_verified) {
+            router.push('/therapist');
+        }
+    }, [session, router]);
+
+    // Continue rendering...
     return (
         <div className="flex h-screen bg-warm-sand overflow-hidden">
             {/* Desktop Sidebar */}

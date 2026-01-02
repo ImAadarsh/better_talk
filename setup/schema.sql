@@ -27,7 +27,10 @@ CREATE TABLE users (
 CREATE TABLE mentors (
   id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id               BIGINT UNSIGNED NOT NULL,
-  headline              VARCHAR(191) DEFAULT NULL,
+  headlines             VARCHAR(191) DEFAULT NULL,
+  designation           VARCHAR(191) DEFAULT NULL,
+  contact_number        VARCHAR(30) DEFAULT NULL,
+  patients_treated      INT DEFAULT 0,
   bio                   TEXT,
   expertise_tags        VARCHAR(255) DEFAULT NULL, -- e.g. "breakup,anxiety,self-growth"
   languages             VARCHAR(255) DEFAULT NULL, -- e.g. "English,Hindi"
