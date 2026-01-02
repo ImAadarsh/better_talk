@@ -2,12 +2,13 @@
 
 import Image from "next/image";
 import { ArrowRight } from "lucide-react";
+import { signIn } from "next-auth/react";
 
-interface LoginScreenProps {
-    onLogin: () => void;
-}
+export default function LoginScreen() {
+    const handleLogin = () => {
+        signIn("google");
+    };
 
-export default function LoginScreen({ onLogin }: LoginScreenProps) {
     return (
         <div className="flex flex-col items-center justify-center min-h-screen px-4 animate-fade-in relative overflow-hidden">
             {/* Background decorations */}
@@ -38,7 +39,7 @@ export default function LoginScreen({ onLogin }: LoginScreenProps) {
 
                 <div className="w-full animate-slide-up" style={{ animationDelay: "0.3s" }}>
                     <button
-                        onClick={onLogin}
+                        onClick={handleLogin}
                         className="group w-full flex items-center justify-center gap-3 bg-forest-green text-white py-4 px-6 rounded-2xl hover:bg-forest-green/90 transition-all active:scale-[0.98] shadow-lg hover:shadow-xl shadow-forest-green/20"
                     >
                         <span className="font-medium text-lg">Continue with Google</span>
