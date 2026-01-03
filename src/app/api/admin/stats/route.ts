@@ -44,14 +44,14 @@ export async function GET() {
         // 2. Aggregate Data for Grid
         const [[{ total_users }]] = await pool.execute("SELECT COUNT(*) as total_users FROM users") as any;
         const [[{ total_mentors }]] = await pool.execute("SELECT COUNT(*) as total_mentors FROM mentors WHERE is_verified = 1") as any;
-        const [[{ total_pending_mentors }]] = await pool.execute("SELECT COUNT(*) as total_count FROM mentors WHERE is_verified = 0") as any;
+        const [[{ total_pending_mentors }]] = await pool.execute("SELECT COUNT(*) as total_pending_mentors FROM mentors WHERE is_verified = 0") as any;
         const [[{ total_revenue }]] = await pool.execute("SELECT SUM(amount_paid_in_inr) as total_revenue FROM bookings WHERE status = 'confirmed'") as any;
         const [[{ total_groups }]] = await pool.execute("SELECT COUNT(*) as total_groups FROM \`groups\` WHERE is_active = 1") as any;
         const [[{ total_posts }]] = await pool.execute("SELECT COUNT(*) as total_posts FROM group_posts WHERE is_deleted = 0") as any;
         const [[{ total_comments }]] = await pool.execute("SELECT COUNT(*) as total_comments FROM group_post_comments WHERE is_deleted = 0") as any;
         const [[{ total_messages }]] = await pool.execute("SELECT COUNT(*) as total_messages FROM contact_messages") as any;
         const [[{ avg_price }]] = await pool.execute("SELECT AVG(price_in_inr) as avg_price FROM mentor_plans WHERE is_active = 1") as any;
-        const [[{ confirmed_bookings }]] = await pool.execute("SELECT COUNT(*) as total FROM bookings WHERE status = 'confirmed'") as any;
+        const [[{ confirmed_bookings }]] = await pool.execute("SELECT COUNT(*) as confirmed_bookings FROM bookings WHERE status = 'confirmed'") as any;
 
         // 3. User Role Distribution (for Pie/Donut)
         const [roleDist] = await pool.execute("SELECT role as name, COUNT(*) as value FROM users GROUP BY role") as any[];

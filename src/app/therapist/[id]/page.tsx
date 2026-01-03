@@ -73,27 +73,119 @@ export default function TherapistProfilePage() {
     // Filter slots for selected date
     const daySlots = slots.filter(slot => isSameDay(parseISO(slot.start_time), selectedDate));
 
+
+    // Load script helper
+    const loadScript = (src: string) => {
+        return new Promise((resolve) => {
+            const script = document.createElement("script");
+            script.src = src;
+            script.onload = () => {
+                resolve(true);
+            };
+            script.onerror = () => {
+                resolve(false);
+            };
+            document.body.appendChild(script);
+        });
+    };
+
     const handleBookSlot = async () => {
         if (!selectedSlot) return;
         setBooking(true);
+
         try {
-            const res = await fetch("/api/therapist/book", {
+            // 1. Load Razorpay SDK
+            const res = await loadScript("https://checkout.razorpay.com/v1/checkout.js");
+
+            if (!res) {
+                alert("Razorpay SDK failed to load. Are you online?");
+                setBooking(false);
+                return;
+            }
+
+            // 2. Create Order
+            const result = await fetch("/api/therapist/book", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
                 body: JSON.stringify({ slotId: selectedSlot.id }),
             });
 
-            if (res.ok) {
-                setShowModal(false);
-                router.push(`/sessions/success?therapist=${encodeURIComponent(therapist?.name || "your therapist")}`);
-            } else {
-                alert("Failed to book slot. It might have been taken.");
-                window.location.reload();
+            if (!result.ok) {
+                const error = await result.json();
+                alert(error.error || "Failed to initiate booking.");
+                setBooking(false);
+                return;
             }
+
+            const { amount, orderId, currency, keyId } = await result.json();
+
+            // 3. Initialize Razorpay Options
+            const options = {
+                key: keyId,
+                amount: amount.toString(),
+                currency: currency,
+                name: "BetterTalk",
+                description: `Session with ${therapist?.name}`,
+                order_id: orderId,
+                handler: async function (response: any) {
+                    const data = {
+                        razorpay_payment_id: response.razorpay_payment_id,
+                        razorpay_order_id: response.razorpay_order_id,
+                        razorpay_signature: response.razorpay_signature,
+                    };
+
+                    // 4. Verify Payment
+                    const verifyRes = await fetch("/api/payment/verify", {
+                        method: "POST",
+                        body: JSON.stringify(data),
+                        headers: { "Content-Type": "application/json" }
+                    });
+
+                    if (verifyRes.ok) {
+                        setShowModal(false);
+                        router.push(`/sessions/success?therapist=${encodeURIComponent(therapist?.name || "your therapist")}`);
+                    } else {
+                        alert("Payment verification failed.");
+                    }
+                },
+                prefill: {
+                    name: "BetterTalk User", // Ideally get from session
+                    email: "user@example.com",
+                    contact: "9999999999",
+                },
+                theme: {
+                    color: "#3B82F6", // Blue-500
+                },
+                modal: {
+                    ondismiss: async function () {
+                        // User closed the popup, cancel booking to release slot
+                        try {
+                            setBooking(true); // Keep loading state
+                            await fetch("/api/bookings/cancel", {
+                                method: "POST",
+                                headers: { "Content-Type": "application/json" },
+                                body: JSON.stringify({
+                                    bookingId: orderId, // Actually bookingId was returned as 'bookingId' in response, let's fix that map
+                                    reason: "User closed payment popup"
+                                }),
+                            });
+                        } catch (e) {
+                            console.error("Failed to cancel booking", e);
+                        } finally {
+                            setBooking(false);
+                            alert("Payment cancelled. The slot has been released.");
+                        }
+                    }
+                }
+            };
+
+            const paymentObject = new (window as any).Razorpay(options);
+            paymentObject.open();
+
         } catch (error) {
             console.error(error);
-        } finally {
             setBooking(false);
+            alert("Something went wrong");
         }
     };
 

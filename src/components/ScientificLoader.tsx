@@ -3,9 +3,9 @@
 import { motion } from "framer-motion";
 import Image from "next/image";
 
-export default function ScientificLoader() {
+export default function ScientificLoader({ className }: { className?: string }) {
     return (
-        <div className="flex flex-col items-center justify-center p-8">
+        <div className={`flex flex-col items-center justify-center p-8 ${className || ""}`}>
             <div className="relative">
                 {/* Rotating Gradient Ring */}
                 <motion.div

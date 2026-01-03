@@ -16,25 +16,56 @@ import {
     Clock,
     Globe,
     Shield,
-    HelpCircle
+    HelpCircle,
+    CreditCard,
+    BarChart3,
+    Star
 } from "lucide-react";
 import Image from "next/image";
 
 import { useState } from "react";
 import { signOut } from "next-auth/react";
 
-const menuItems = [
-    { name: "Dashboard", href: "/adx", icon: LayoutDashboard },
-    { name: "Users", href: "/adx/users", icon: Users },
-    { name: "Therapists", href: "/adx/therapists", icon: Stethoscope },
-    { name: "Plan Management", href: "/adx/plans", icon: FolderTree },
-    { name: "Slot Management", href: "/adx/slots", icon: Clock },
-    { name: "Bookings", href: "/adx/bookings", icon: CalendarCheck },
-    { name: "Communities", href: "/adx/groups", icon: Globe },
-    { name: "Moderation", href: "/adx/moderation", icon: Shield },
-    { name: "Stories", href: "/adx/stories", icon: Settings }, // Using Settings temporarily or import another icon
-    { name: "FAQs", href: "/adx/faqs", icon: HelpCircle },
-    { name: "Contact Inquiries", href: "/adx/messages", icon: MessageSquare },
+const menuGroups = [
+    {
+        title: "Overview",
+        items: [
+            { name: "Dashboard", href: "/adx", icon: LayoutDashboard },
+            { name: "Analytics", href: "/adx/analytics", icon: BarChart3 },
+        ]
+    },
+    {
+        title: "User Management",
+        items: [
+            { name: "Users", href: "/adx/users", icon: Users },
+            { name: "Therapists", href: "/adx/therapists", icon: Stethoscope },
+        ]
+    },
+    {
+        title: "Booking Management",
+        items: [
+            { name: "Bookings", href: "/adx/bookings", icon: CalendarCheck },
+            { name: "Transactions", href: "/adx/transactions", icon: CreditCard },
+            { name: "Plan Management", href: "/adx/plans", icon: FolderTree },
+            { name: "Slot Management", href: "/adx/slots", icon: Clock },
+        ]
+    },
+    {
+        title: "Community & Content",
+        items: [
+            { name: "Communities", href: "/adx/groups", icon: Globe },
+            { name: "Stories", href: "/adx/stories", icon: Settings },
+            { name: "Content Moderation", href: "/adx/moderation", icon: Shield },
+            { name: "Review Moderation", href: "/adx/review-moderation", icon: Star },
+        ]
+    },
+    {
+        title: "Support",
+        items: [
+            { name: "FAQs", href: "/adx/faqs", icon: HelpCircle },
+            { name: "Contact Inquiries", href: "/adx/messages", icon: MessageSquare },
+        ]
+    }
 ];
 
 export default function AdminSidebar() {
@@ -78,27 +109,36 @@ export default function AdminSidebar() {
                     </div>
 
                     {/* Menu */}
-                    <nav className="flex-1 space-y-1">
-                        {menuItems.map((item) => {
-                            const isActive = pathname === item.href;
-                            const Icon = item.icon;
-                            return (
-                                <Link
-                                    key={item.href}
-                                    href={item.href}
-                                    onClick={() => setIsOpen(false)}
-                                    className={`
-                                        flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold transition-all
-                                        ${isActive
-                                            ? "bg-gray-900 text-white shadow-xl shadow-gray-900/10"
-                                            : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}
-                                    `}
-                                >
-                                    <Icon className={`w-5 h-5 ${isActive ? "text-white" : "text-gray-400"}`} />
-                                    {item.name}
-                                </Link>
-                            );
-                        })}
+                    <nav className="flex-1 space-y-6 overflow-y-auto pr-2 pb-6 custom-scrollbar">
+                        {menuGroups.map((group, groupIdx) => (
+                            <div key={groupIdx}>
+                                <h3 className="px-4 text-[10px] font-bold text-gray-400 uppercase tracking-widest mb-2">
+                                    {group.title}
+                                </h3>
+                                <div className="space-y-1">
+                                    {group.items.map((item) => {
+                                        const isActive = pathname === item.href;
+                                        const Icon = item.icon;
+                                        return (
+                                            <Link
+                                                key={item.href}
+                                                href={item.href}
+                                                onClick={() => setIsOpen(false)}
+                                                className={`
+                                                    flex items-center gap-3 px-4 py-2.5 rounded-xl text-sm font-semibold transition-all
+                                                    ${isActive
+                                                        ? "bg-gray-900 text-white shadow-xl shadow-gray-900/10"
+                                                        : "text-gray-500 hover:bg-gray-50 hover:text-gray-900"}
+                                                `}
+                                            >
+                                                <Icon className={`w-4 h-4 ${isActive ? "text-white" : "text-gray-400"}`} />
+                                                {item.name}
+                                            </Link>
+                                        );
+                                    })}
+                                </div>
+                            </div>
+                        ))}
                     </nav>
 
                     {/* Footer */}

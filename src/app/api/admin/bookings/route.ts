@@ -19,6 +19,7 @@ export async function GET(request: Request) {
         let query = `
             SELECT 
                 b.id,
+                b.status,
                 b.mentor_slot_id,
                 b.session_status,
                 b.joining_link,

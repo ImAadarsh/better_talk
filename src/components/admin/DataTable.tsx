@@ -15,7 +15,7 @@ export interface FilterConfig {
     options: FilterOption[];
 }
 
-interface Column {
+export interface Column {
     key: string;
     label: string;
     render?: (val: any, row: any) => React.ReactNode;

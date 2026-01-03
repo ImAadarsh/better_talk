@@ -1,8 +1,8 @@
-
 import { NextResponse } from "next/server";
 import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
+import { razorpay } from "@/lib/razorpay";
 
 export async function POST(req: Request) {
     try {
@@ -28,7 +28,7 @@ export async function POST(req: Request) {
         }
         const userId = userRows[0].id;
 
-        // 2. Get Slot Details (mentor_id, plan_id, price)
+        // 2. Get Slot Details
         const [slotRows] = await pool.execute(
             `SELECT ms.id, ms.mentor_id, ms.mentor_plans_id, mp.price_in_inr 
              FROM mentor_slots ms
@@ -43,37 +43,54 @@ export async function POST(req: Request) {
 
         const slot = slotRows[0];
 
-        // 3. Book Slot
+        // 3. Temporarily Book Slot (Ideally should be a lock, but for now we mark booked)
+        // We will mark is_booked=1, client_id=userId. 
+        // If payment fails, we rely on a cleanup cron or manual release (out of scope for now)
         await pool.execute(
             "UPDATE mentor_slots SET client_id = ?, is_booked = 1 WHERE id = ?",
             [userId, slotId]
         );
 
-        // 4. Create Booking Record
+        // 4. Create Pending Booking
+        // 'session_status' defaults to 'scheduled' but 'status' is 'pending'
         const [bookingResult] = await pool.execute(
             `INSERT INTO bookings (user_id, mentor_id, mentor_plan_id, mentor_slot_id, status, session_status, amount_paid_in_inr)
-             VALUES (?, ?, ?, ?, 'confirmed', 'scheduled', ?)`,
+             VALUES (?, ?, ?, ?, 'pending', 'scheduled', ?)`,
             [userId, slot.mentor_id, slot.mentor_plans_id, slotId, slot.price_in_inr]
         ) as any;
 
         const bookingId = bookingResult.insertId;
 
-        // 5. Send Notifications
-        const [userDetails] = await pool.execute("SELECT id, name, email FROM users WHERE id = ?", [userId]) as any[];
+        // 5. Create Razorpay Order
+        const amountInPaise = slot.price_in_inr * 100;
+        const options = {
+            amount: amountInPaise,
+            currency: "INR",
+            receipt: `booking_${bookingId}`,
+            notes: {
+                bookingId: bookingId,
+                slotId: slotId,
+                userId: userId
+            }
+        };
 
-        const [mentorDetails] = await pool.execute(`
-            SELECT m.user_id, u.email, u.name 
-            FROM mentors m 
-            JOIN users u ON m.user_id = u.id 
-            WHERE m.id = ?
-        `, [slot.mentor_id]) as any[];
+        const order = await razorpay.orders.create(options);
 
-        if (userDetails.length > 0 && mentorDetails.length > 0) {
-            const { notifyBookingCreated } = await import("@/lib/notifications");
-            await notifyBookingCreated(bookingId, userDetails[0], mentorDetails[0]);
-        }
+        // Update booking with payment reference (order_id)
+        await pool.execute(
+            "UPDATE bookings SET payment_reference = ? WHERE id = ?",
+            [order.id, bookingId]
+        );
 
-        return NextResponse.json({ success: true, message: "Slot booked successfully" });
+        return NextResponse.json({
+            success: true,
+            orderId: order.id,
+            amount: amountInPaise,
+            currency: "INR",
+            keyId: process.env.RAZORPAY_API_KEY,
+            bookingId: bookingId,
+            mentorId: slot.mentor_id
+        });
 
     } catch (error) {
         console.error("Booking error:", error);

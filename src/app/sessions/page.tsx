@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Calendar, Clock, Video, User, MoreVertical, FileText, MessageCircle, X } from "lucide-react";
+import { Calendar, Clock, Video, User, MoreVertical, FileText, MessageCircle, X, Star } from "lucide-react";
 import { format, isPast, parseISO, addDays, differenceInSeconds } from "date-fns";
 import ScientificLoader from "@/components/ScientificLoader";
 
@@ -28,6 +28,11 @@ export default function SessionsPage() {
     const [showNotesModal, setShowNotesModal] = useState(false);
     const [selectedSessionNotes, setSelectedSessionNotes] = useState<string | null>(null);
     const [loadingNotes, setLoadingNotes] = useState(false);
+    const [showReviewModal, setShowReviewModal] = useState(false);
+    const [reviewRating, setReviewRating] = useState(0);
+    const [reviewText, setReviewText] = useState("");
+    const [selectedBookingId, setSelectedBookingId] = useState<number | null>(null);
+    const [isSubmittingReview, setIsSubmittingReview] = useState(false);
 
     useEffect(() => {
         async function fetchSessions() {
@@ -89,6 +94,46 @@ export default function SessionsPage() {
         if (days > 0) return `${days}d ${hours}h left`;
         if (hours > 0) return `${hours}h left`;
         return "Expires soon";
+    };
+
+    const handleOpenReviewModal = (bookingId: number) => {
+        setSelectedBookingId(bookingId);
+        setReviewRating(0);
+        setReviewText("");
+        setShowReviewModal(true);
+    };
+
+    const submitReview = async () => {
+        if (!selectedBookingId || reviewRating === 0) {
+            alert("Please select a rating.");
+            return;
+        }
+
+        setIsSubmittingReview(true);
+        try {
+            const res = await fetch("/api/reviews", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({
+                    booking_id: selectedBookingId,
+                    rating: reviewRating,
+                    review_text: reviewText
+                })
+            });
+
+            if (res.ok) {
+                alert("Review submitted successfully!");
+                setShowReviewModal(false);
+            } else {
+                const data = await res.json();
+                alert(data.error || "Failed to submit review");
+            }
+        } catch (error) {
+            console.error("Submit review error", error);
+            alert("An error occurred.");
+        } finally {
+            setIsSubmittingReview(false);
+        }
     };
 
     // Sessions are completed if: session_status is 'completed' OR end_time has passed
@@ -234,6 +279,15 @@ export default function SessionsPage() {
                                             )}
                                         </div>
                                     )}
+                                    {activeTab === 'past' && session.booking_id && (
+                                        <button
+                                            onClick={() => handleOpenReviewModal(session.booking_id!)}
+                                            className="w-full md:w-auto px-6 py-3 bg-amber-50 text-amber-700 font-medium rounded-xl hover:bg-amber-100 transition-all flex items-center justify-center gap-2 mt-2"
+                                        >
+                                            <Star className="w-4 h-4" />
+                                            Rate Session
+                                        </button>
+                                    )}
                                 </div>
                             </div>
                         ))}
@@ -253,6 +307,45 @@ export default function SessionsPage() {
                             <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
                                 <p className="text-gray-700 whitespace-pre-wrap">{selectedSessionNotes}</p>
                             </div>
+                        </div>
+                    </div>
+                )}
+                {showReviewModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowReviewModal(false)}>
+                        <div className="bg-white rounded-3xl p-6 w-full max-w-lg shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-6">
+                                <h3 className="text-2xl font-bold text-gray-900">Rate your Session</h3>
+                                <button onClick={() => setShowReviewModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex justify-center gap-2 mb-6">
+                                {[1, 2, 3, 4, 5].map((star) => (
+                                    <button
+                                        key={star}
+                                        onClick={() => setReviewRating(star)}
+                                        className={`transition-all hover:scale-110 ${reviewRating >= star ? 'text-amber-400 fill-amber-400' : 'text-gray-300'}`}
+                                    >
+                                        <Star className="w-10 h-10" fill={reviewRating >= star ? "currentColor" : "none"} />
+                                    </button>
+                                ))}
+                            </div>
+
+                            <textarea
+                                value={reviewText}
+                                onChange={(e) => setReviewText(e.target.value)}
+                                placeholder="Share your experience (optional)..."
+                                className="w-full px-4 py-3 border border-gray-200 rounded-xl focus:outline-none focus:ring-2 focus:ring-brand-primary/20 bg-gray-50 h-32 mb-6"
+                            />
+
+                            <button
+                                onClick={submitReview}
+                                disabled={isSubmittingReview || reviewRating === 0}
+                                className="w-full py-3.5 bg-brand-primary text-white font-bold rounded-xl hover:bg-brand-primary/90 transition-all disabled:opacity-50 flex items-center justify-center gap-2"
+                            >
+                                {isSubmittingReview ? <ScientificLoader className="w-5 h-5 border-white" /> : "Submit Review"}
+                            </button>
                         </div>
                     </div>
                 )}

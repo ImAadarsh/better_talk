@@ -4,14 +4,15 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
     Calendar, User, Clock, X, FileText, MessageCircle,
-    Link as LinkIcon, CheckCircle, Copy, ExternalLink, Bell
+    Link as LinkIcon, CheckCircle, Copy, ExternalLink, Bell, XCircle
 } from "lucide-react";
-import ScientificLoader from "@/components/ScientificLoader";
 import { format, parseISO, addDays, isSameDay } from "date-fns";
+import DataTable, { Column, FilterConfig } from "@/components/admin/DataTable";
 
 interface Booking {
     id: number;
     mentor_slot_id: number;
+    status: string;
     user_name: string;
     user_image?: string;
     user_avatar?: string;
@@ -55,7 +56,6 @@ export default function AdminBookingsPage() {
     const [notes, setNotes] = useState("");
     const [messages, setMessages] = useState<Message[]>([]);
     const [joiningLink, setJoiningLink] = useState("");
-    const [filterStatus, setFilterStatus] = useState<string>("all");
     const [showRescheduleModal, setShowRescheduleModal] = useState(false);
     const [availableSlots, setAvailableSlots] = useState<any[]>([]);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
@@ -167,15 +167,10 @@ export default function AdminBookingsPage() {
 
     const fetchAvailableSlots = async (mentorId: number) => {
         try {
-            // Reusing the public API to get slots for the mentor
-            // Ideally we'd have an internal ID lookup, but assuming mentor_id in booking maps to the public ID or we can fetch via user_id
-            // Wait, booking.mentor_id is usually the PK of mentors table. 
-            // The public API /api/therapist/[id] uses the mentor ID.
             const res = await fetch(`/api/therapist/${mentorId}`);
             if (res.ok) {
                 const data = await res.json();
                 setAvailableSlots(data.slots || []);
-                // Find first date with slots
                 if (data.slots && data.slots.length > 0) {
                     const firstSlotDate = parseISO(data.slots[0].start_time);
                     if (firstSlotDate > new Date()) setSelectedDate(firstSlotDate);
@@ -216,26 +211,6 @@ export default function AdminBookingsPage() {
 
     const openRescheduleModal = async () => {
         if (!selectedBooking) return;
-        // We need the mentor ID. 
-        // Note: Booking interface has mentor_slot_id, but we need the mentor's ID to fetch THEIR slots.
-        // The booking object structure in fetchBookings usually joins tables.
-        // Let's verify if 'mentor_id' is available in the booking object.
-        // Looking at the interface Booking... it has 'mentor_slot_id'.
-        // It does NOT explicitly have 'mentor_id'.
-        // I need to ensure 'mentor_id' is fetched in /api/admin/bookings.
-        // Let's assume for now it is or I need to update the API.
-        // Re-checking the interface... "interface Booking" in line 12.
-        // It has mentor_slot_id. 
-        // Wait, looking at fetchBookings response... 
-        // I should probably check the API /api/admin/bookings to be sure.
-        // BUT, the /api/admin/bookings/[id] (details) DEFINITELY should have it.
-        // The interface Booking (Line 12) does not show it.
-        // Let's Update the interface and the API if needed.
-        // For now, I will use 'selectedBooking.mentor_id' if casting allows, 
-        // or I might need to fetch it.
-
-        // Actually, let's assume I need to fetch it or it's there. 
-        // I'll cast it for now, and I will strictly verify the API response in next step.
         await fetchAvailableSlots((selectedBooking as any).mentor_id);
         setShowRescheduleModal(true);
     };
@@ -285,10 +260,6 @@ export default function AdminBookingsPage() {
         alert("Copied to clipboard!");
     };
 
-    const filteredBookings = filterStatus === "all"
-        ? bookings
-        : bookings.filter(b => b.session_status === filterStatus);
-
     const getStatusColor = (status: string) => {
         switch (status) {
             case 'scheduled': return 'bg-blue-100 text-blue-700';
@@ -298,158 +269,163 @@ export default function AdminBookingsPage() {
         }
     };
 
-    if (loading) {
-        return (
-            <div className="flex justify-center items-center h-screen">
-                <ScientificLoader />
-            </div>
-        );
-    }
+    const columns: Column[] = [
+        {
+            key: "id",
+            label: "ID",
+            render: (val: any) => <span className="font-bold text-gray-400 text-xs">#{val}</span>
+        },
+        {
+            key: "user_name",
+            label: "Patient",
+            render: (_: any, row: Booking) => (
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                        {(row.user_image || row.user_avatar) ? (
+                            <Image
+                                src={row.user_image || row.user_avatar!}
+                                alt={row.user_name}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                                unoptimized
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <User className="w-4 h-4 text-gray-400" />
+                            </div>
+                        )}
+                    </div>
+                    <span className="font-medium text-gray-900">{row.user_name || "Unknown Patient"}</span>
+                </div>
+            )
+        },
+        {
+            key: "mentor_name",
+            label: "Therapist",
+            render: (_: any, row: Booking) => (
+                <div className="flex items-center gap-3">
+                    <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
+                        {(row.mentor_image || row.mentor_avatar) ? (
+                            <Image
+                                src={row.mentor_image || row.mentor_avatar!}
+                                alt={row.mentor_name}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                                unoptimized
+                            />
+                        ) : (
+                            <div className="w-full h-full flex items-center justify-center">
+                                <User className="w-4 h-4 text-gray-400" />
+                            </div>
+                        )}
+                    </div>
+                    <span className="font-medium text-gray-900">{row.mentor_name || "Unknown Therapist"}</span>
+                </div>
+            )
+        },
+        {
+            key: "start_time",
+            label: "Date & Time",
+            render: (val: string) => val ? (
+                <div className="flex items-center gap-2 text-sm text-gray-600">
+                    <Calendar className="w-4 h-4" />
+                    <span>{format(parseISO(val), "MMM dd, yyyy")}</span>
+                    <Clock className="w-4 h-4 ml-2" />
+                    <span>{format(parseISO(val), "h:mm a")}</span>
+                </div>
+            ) : <span className="text-sm text-gray-400 font-medium">Time not set</span>
+        },
+        {
+            key: "plan_name",
+            label: "Plan",
+            render: (val: string) => <span className="text-sm font-medium text-gray-900">{val || "N/A"}</span>
+        },
+        {
+            key: "status",
+            label: "Payment Status",
+            render: (val: string) => (
+                <span className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg text-xs font-bold uppercase tracking-wide
+                    ${val === 'confirmed' ? 'bg-green-50 text-green-600' :
+                        val === 'cancelled' ? 'bg-red-50 text-red-600' :
+                            'bg-amber-50 text-amber-600'}
+                `}>
+                    {val === 'confirmed' && <CheckCircle className="w-3.5 h-3.5" />}
+                    {val === 'cancelled' && <XCircle className="w-3.5 h-3.5" />}
+                    {val === 'pending' && <Clock className="w-3.5 h-3.5" />}
+                    {val || 'pending'}
+                </span>
+            )
+        },
+        {
+            key: "session_status",
+            label: "Session Status",
+            render: (val: string) => (
+                <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(val)}`}>
+                    {val}
+                </span>
+            )
+        }
+    ];
+
+    const filters: FilterConfig[] = [
+        {
+            key: "session_status",
+            label: "Session Status",
+            options: [
+                { value: "scheduled", label: "Scheduled" },
+                { value: "completed", label: "Completed" },
+                { value: "cancelled", label: "Cancelled" }
+            ]
+        },
+        {
+            key: "status",
+            label: "Payment Status",
+            options: [
+                { value: "confirmed", label: "Confirmed" },
+                { value: "pending", label: "Pending" },
+                { value: "cancelled", label: "Cancelled" }
+            ]
+        }
+    ];
 
     return (
         <div className="p-8">
-            <div className="mb-8">
-                <h1 className="text-3xl font-bold text-gray-900 mb-2">Bookings Management</h1>
-                <p className="text-gray-600">View and manage all session bookings</p>
-            </div>
-
-            {/* Filters */}
-            <div className="mb-6 flex gap-2">
-                {['all', 'scheduled', 'completed', 'cancelled'].map((status) => (
-                    <button
-                        key={status}
-                        onClick={() => setFilterStatus(status)}
-                        className={`px-4 py-2 rounded-lg font-medium transition-all ${filterStatus === status
-                            ? 'bg-brand-primary text-white'
-                            : 'bg-gray-100 text-gray-700 hover:bg-gray-200'
-                            }`}
-                    >
-                        {status.charAt(0).toUpperCase() + status.slice(1)}
-                    </button>
-                ))}
-            </div>
-
-            {/* Bookings Table */}
-            <div className="bg-white rounded-2xl shadow-sm border border-gray-100 overflow-hidden">
-                <div className="overflow-x-auto">
-                    <table className="w-full">
-                        <thead className="bg-gray-50 border-b border-gray-100">
-                            <tr>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">ID</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Patient</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Therapist</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Date & Time</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Plan</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Status</th>
-                                <th className="px-6 py-4 text-left text-xs font-semibold text-gray-600 uppercase">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody className="divide-y divide-gray-100">
-                            {filteredBookings.length === 0 ? (
-                                <tr>
-                                    <td colSpan={7} className="px-6 py-10 text-center text-gray-500">
-                                        No bookings found for the selected filter.
-                                    </td>
-                                </tr>
-                            ) : filteredBookings.map((booking) => (
-                                <tr key={booking.id} className="hover:bg-gray-50 transition-colors">
-                                    <td className="px-6 py-4">
-                                        <span className="font-bold text-gray-400 text-xs">#{booking.id}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
-                                                {(booking.user_image || booking.user_avatar) ? (
-                                                    <Image
-                                                        src={booking.user_image || booking.user_avatar!}
-                                                        alt={booking.user_name}
-                                                        width={32}
-                                                        height={32}
-                                                        className="w-full h-full object-cover"
-                                                        unoptimized
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center">
-                                                        <User className="w-4 h-4 text-gray-400" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <span className="font-medium text-gray-900">{booking.user_name || "Unknown Patient"}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex items-center gap-3">
-                                            <div className="w-8 h-8 rounded-full overflow-hidden bg-gray-200">
-                                                {(booking.mentor_image || booking.mentor_avatar) ? (
-                                                    <Image
-                                                        src={booking.mentor_image || booking.mentor_avatar!}
-                                                        alt={booking.mentor_name}
-                                                        width={32}
-                                                        height={32}
-                                                        className="w-full h-full object-cover"
-                                                        unoptimized
-                                                    />
-                                                ) : (
-                                                    <div className="w-full h-full flex items-center justify-center">
-                                                        <User className="w-4 h-4 text-gray-400" />
-                                                    </div>
-                                                )}
-                                            </div>
-                                            <span className="font-medium text-gray-900">{booking.mentor_name || "Unknown Therapist"}</span>
-                                        </div>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        {booking.start_time ? (
-                                            <div className="flex items-center gap-2 text-sm text-gray-600">
-                                                <Calendar className="w-4 h-4" />
-                                                <span>{format(parseISO(booking.start_time), "MMM dd, yyyy")}</span>
-                                                <Clock className="w-4 h-4 ml-2" />
-                                                <span>{format(parseISO(booking.start_time), "h:mm a")}</span>
-                                            </div>
-                                        ) : (
-                                            <span className="text-sm text-gray-400 font-medium">Time not set</span>
-                                        )}
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className="text-sm font-medium text-gray-900">{booking.plan_name || "N/A"}</span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <span className={`px-3 py-1 rounded-full text-xs font-semibold ${getStatusColor(booking.session_status)}`}>
-                                            {booking.session_status}
-                                        </span>
-                                    </td>
-                                    <td className="px-6 py-4">
-                                        <div className="flex gap-2">
-                                            <button
-                                                onClick={() => fetchBookingDetails(booking.id)}
-                                                className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
-                                            >
-                                                Details
-                                            </button>
-                                            {booking.has_notes ? (
-                                                <button
-                                                    onClick={() => openNotesModal(booking)}
-                                                    className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium hover:bg-purple-100 transition-colors"
-                                                >
-                                                    Notes
-                                                </button>
-                                            ) : null}
-                                            {booking.chat_id && (
-                                                <button
-                                                    onClick={() => openChatModal(booking)}
-                                                    className="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
-                                                >
-                                                    Chat
-                                                </button>
-                                            )}
-                                        </div>
-                                    </td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            <DataTable
+                title="Bookings Management"
+                columns={columns}
+                data={bookings}
+                loading={loading}
+                filters={filters}
+                searchPlaceholder="Search patients, therapists..."
+                actions={(row: Booking) => (
+                    <div className="flex gap-2 justify-end">
+                        <button
+                            onClick={() => fetchBookingDetails(row.id)}
+                            className="px-3 py-1.5 bg-blue-50 text-blue-700 rounded-lg text-xs font-medium hover:bg-blue-100 transition-colors"
+                        >
+                            Details
+                        </button>
+                        {row.has_notes ? (
+                            <button
+                                onClick={() => openNotesModal(row)}
+                                className="px-3 py-1.5 bg-purple-50 text-purple-700 rounded-lg text-xs font-medium hover:bg-purple-100 transition-colors"
+                            >
+                                Notes
+                            </button>
+                        ) : null}
+                        {row.chat_id && (
+                            <button
+                                onClick={() => openChatModal(row)}
+                                className="px-3 py-1.5 bg-green-50 text-green-700 rounded-lg text-xs font-medium hover:bg-green-100 transition-colors"
+                            >
+                                Chat
+                            </button>
+                        )}
+                    </div>
+                )}
+            />
 
             {/* Booking Details Modal */}
             {showDetailsModal && selectedBooking && (
@@ -786,28 +762,22 @@ export default function AdminBookingsPage() {
                                     <Clock className="w-4 h-4 text-brand-primary" /> Available Slots
                                 </h4>
                                 {daySlots.length === 0 ? (
-                                    <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
-                                        <p className="text-gray-500 text-sm">No available slots for this date.</p>
-                                    </div>
+                                    <p className="text-gray-500 text-sm">No slots available for this date.</p>
                                 ) : (
-                                    <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                    <div className="grid grid-cols-3 sm:grid-cols-4 md:grid-cols-5 gap-3">
                                         {daySlots.map(slot => (
                                             <button
                                                 key={slot.id}
                                                 onClick={() => handleReschedule(slot.id)}
                                                 disabled={rescheduling}
-                                                className="py-3 px-2 rounded-xl border border-blue-100 bg-blue-50/50 text-blue-700 text-sm font-semibold hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                className="px-3 py-2 bg-white border border-gray-200 rounded-lg text-sm font-medium hover:border-brand-primary hover:text-brand-primary transition-all disabled:opacity-50"
                                             >
-                                                {rescheduling ? "Rescheduling..." : format(parseISO(slot.start_time), "h:mm a")}
+                                                {format(parseISO(slot.start_time), "h:mm a")}
                                             </button>
                                         ))}
                                     </div>
                                 )}
                             </div>
-                        </div>
-
-                        <div className="pt-4 border-t border-gray-100 mt-4 text-xs text-gray-400 text-center">
-                            Note: Rescheduling will immediately free the current slot and book the new one. Notifications will be sent to both parties.
                         </div>
                     </div>
                 </div>
