@@ -107,7 +107,7 @@ export default function ReviewModerationPage() {
                                             <span className="text-sm text-gray-500">for {review.mentor_name}</span>
                                         </div>
                                         <p className="text-gray-700 leading-relaxed bg-gray-50 p-4 rounded-xl border border-gray-100 italic">
-                                            "{review.review_text}"
+                                            &quot;{review.review_text}&quot;
                                         </p>
                                         <p className="text-xs text-gray-400 mt-2">Submitted on {new Date(review.created_at).toLocaleDateString()}</p>
                                     </div>
