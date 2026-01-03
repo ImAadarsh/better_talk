@@ -4,7 +4,6 @@ import { useSession } from "next-auth/react";
 import { useEffect, useState } from "react";
 import LoginScreen from "@/components/LoginScreen";
 import LandingPage from "@/components/LandingPage";
-import OnboardingScreen from "@/components/OnboardingScreen";
 import ScientificLoader from "@/components/ScientificLoader";
 
 export default function Home() {
@@ -30,13 +29,20 @@ export default function Home() {
           const data = await res.json();
 
           if (data.exists) {
-            window.location.href = "/groups";
+            // Check for Admin role
+            if ((session.user as any).role === 'admin') {
+              window.location.href = "/adx";
+            } else if ((session.user as any).role === 'mentor') {
+              window.location.href = "/therapist/dashboard";
+            } else {
+              window.location.href = "/groups";
+            }
           } else {
-            setView("onboarding");
+            window.location.href = "/onboarding";
           }
         } catch (error) {
           console.error("Failed to check user:", error);
-          setView("onboarding");
+          window.location.href = "/onboarding";
         }
       }
     }
@@ -55,10 +61,6 @@ export default function Home() {
 
   if (view === "landing") {
     return <LandingPage />;
-  }
-
-  if (view === "onboarding") {
-    return <OnboardingScreen onComplete={() => (window.location.href = "/groups")} />;
   }
 
   return (

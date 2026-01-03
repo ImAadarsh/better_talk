@@ -20,6 +20,7 @@ export default function PublicNavbar() {
     const navLinks = [
         { name: "About", href: "/about" },
         { name: "Stories", href: "/stories" },
+        { name: "FAQ", href: "/faq" },
         { name: "Contact", href: "/contact" },
         { name: "For Therapists", href: "/therapist" },
     ];
