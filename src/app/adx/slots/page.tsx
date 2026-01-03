@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from "react";
 import ScientificLoader from "@/components/ScientificLoader";
-import { format, addMinutes, parse, isBefore } from "date-fns";
+import { format, addMinutes, parse, isBefore, startOfDay } from "date-fns";
 import { Calendar, Clock, Plus, Trash2, User, ChevronDown, Save, Loader2 } from "lucide-react";
 
 export default function SlotManagementPage() {
@@ -72,6 +72,11 @@ export default function SlotManagementPage() {
         if (!selectedPlanId) return alert("Select a plan first");
         const plan = plans.find(p => p.id.toString() === selectedPlanId);
         if (!plan) return;
+
+        if (isBefore(parse(date, 'yyyy-MM-dd', new Date()), startOfDay(new Date()))) {
+            alert("Cannot generate slots for past dates.");
+            return;
+        }
 
         const duration = parseInt(plan.session_duration_min);
         const slots = [];
@@ -193,6 +198,7 @@ export default function SlotManagementPage() {
                                 <input
                                     type="date"
                                     value={date}
+                                    min={new Date().toISOString().split('T')[0]}
                                     onChange={(e) => setDate(e.target.value)}
                                     className="w-full px-4 py-4 rounded-2xl bg-gray-50 border border-gray-100 outline-none font-bold"
                                 />

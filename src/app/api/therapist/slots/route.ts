@@ -38,6 +38,11 @@ export async function POST(req: Request) {
             const startStr = new Date(slot.start).toISOString().slice(0, 19).replace('T', ' ');
             const endStr = new Date(slot.end).toISOString().slice(0, 19).replace('T', ' ');
 
+            if (new Date(slot.start) < new Date()) {
+                conflicts.push(slot);
+                continue;
+            }
+
             // Check overlap
             const [overlapRows] = await pool.execute(
                 `SELECT id FROM mentor_slots 
