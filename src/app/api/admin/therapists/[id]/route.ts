@@ -17,7 +17,8 @@ export async function GET(
 
         const mentorId = params.id;
 
-        SELECT
+        const [rows] = await pool.execute(`
+            SELECT
         m.*,
             u.name,
             u.email,

@@ -22,6 +22,7 @@ interface Therapist {
     headlines: string;
     patients_treated: number;
     image?: string;
+    experience_years: number;
     experience_start_date: string;
     average_rating: string | number;
 }
@@ -258,7 +259,7 @@ export default function TherapistProfilePage() {
                                     <Clock className="w-5 h-5" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-xl font-bold text-gray-900">5+ Yrs</p>
+                                    <p className="text-xl font-bold text-gray-900">{therapist.experience_years}+ Yrs</p>
                                     <p className="text-xs text-gray-400 font-medium uppercase">Experience</p>
                                 </div>
                             </div>
