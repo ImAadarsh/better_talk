@@ -214,6 +214,19 @@ export default function ContactPage() {
                 </div>
             </section>
 
+            {/* Google Map Section */}
+            <section className="w-full h-[400px] bg-gray-100">
+                <iframe
+                    src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3806.467803689408!2d78.498844!3d17.436662!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x3bcb9a26d7c71d0d%3A0x6b4f7b6b6b6b6b6b!2sSecunderabad%2C%20Hyderabad%2C%20Telangana%20500026%2C%20India!5e0!3m2!1sen!2sin!4v1625648484848!5m2!1sen!2sin"
+                    width="100%"
+                    height="100%"
+                    style={{ border: 0 }}
+                    allowFullScreen={true}
+                    loading="lazy"
+                    title="BetterTalk Location"
+                ></iframe>
+            </section>
+
             <Footer />
         </div>
     );
