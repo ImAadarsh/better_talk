@@ -76,7 +76,16 @@ export async function PATCH(
         }
 
         if (action === "approve") {
+            // Fetch User Details for Notification
+            const [users] = await pool.execute("SELECT id, name, email FROM users WHERE id = ?", [userId]) as any[];
+
             await pool.execute("UPDATE mentors SET is_verified = 1 WHERE id = ?", [mentorId]);
+
+            if (users.length > 0) {
+                const { notifyTherapistApproval } = await import("@/lib/notifications");
+                await notifyTherapistApproval(users[0]);
+            }
+
             return NextResponse.json({ success: true, message: "Therapist verified" });
         }
 

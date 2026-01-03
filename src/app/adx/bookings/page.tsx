@@ -4,7 +4,7 @@ import { useState, useEffect } from "react";
 import Image from "next/image";
 import {
     Calendar, User, Clock, X, FileText, MessageCircle,
-    Link as LinkIcon, CheckCircle, Copy, ExternalLink
+    Link as LinkIcon, CheckCircle, Copy, ExternalLink, Bell
 } from "lucide-react";
 import ScientificLoader from "@/components/ScientificLoader";
 import { format, parseISO } from "date-fns";
@@ -152,6 +152,27 @@ export default function AdminBookingsPage() {
             }
         } catch (error) {
             console.error("Error updating link:", error);
+        }
+    };
+
+    const notifyParticipants = async () => {
+        if (!selectedBooking) return;
+        if (!confirm("Send email notification to both User and Therapist?")) return;
+
+        try {
+            const res = await fetch(`/api/bookings/${selectedBooking.id}/notify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: 'notify_both' }),
+            });
+
+            if (res.ok) {
+                alert("Notifications sent successfully");
+            } else {
+                alert("Failed to send notifications");
+            }
+        } catch (error) {
+            console.error("Error sending notifications:", error);
         }
     };
 
@@ -351,9 +372,18 @@ export default function AdminBookingsPage() {
                     <div className="bg-white rounded-3xl p-6 w-full max-w-3xl shadow-2xl max-h-[90vh] overflow-y-auto" onClick={(e) => e.stopPropagation()}>
                         <div className="flex items-center justify-between mb-6">
                             <h3 className="text-2xl font-bold text-gray-900">Booking Details</h3>
-                            <button onClick={() => setShowDetailsModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
-                                <X className="w-5 h-5" />
-                            </button>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={notifyParticipants}
+                                    className="p-2 hover:bg-gray-100 rounded-lg text-gray-600 hover:text-brand-primary"
+                                    title="Notify Participants"
+                                >
+                                    <Bell className="w-5 h-5" />
+                                </button>
+                                <button onClick={() => setShowDetailsModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
                         </div>
 
                         <div className="space-y-6">

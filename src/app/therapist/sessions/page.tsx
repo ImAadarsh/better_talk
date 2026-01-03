@@ -3,7 +3,7 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import TherapistLayout from "@/components/TherapistLayout";
-import { Calendar, Clock, User, FileText, MessageCircle, Link as LinkIcon, X, CheckCircle } from "lucide-react";
+import { Calendar, Clock, User, FileText, MessageCircle, Link as LinkIcon, X, CheckCircle, Bell } from "lucide-react";
 import { format, isPast, parseISO, addDays, differenceInSeconds } from "date-fns";
 import ScientificLoader from "@/components/ScientificLoader";
 
@@ -135,6 +135,24 @@ export default function TherapistSessionsPage() {
             console.error("Failed to update joining link", error);
         } finally {
             setSaving(false);
+        }
+    };
+
+    const notifyUser = async (bookingId: number) => {
+        if (!confirm("Send email notification to user about this session?")) return;
+        try {
+            const res = await fetch(`/api/bookings/${bookingId}/notify`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ type: 'notify_user' }),
+            });
+            if (res.ok) {
+                alert("Notification sent to user");
+            } else {
+                alert("Failed to send notification");
+            }
+        } catch (error) {
+            console.error("Failed to notify user", error);
         }
     };
 
@@ -276,6 +294,13 @@ export default function TherapistSessionsPage() {
                                             >
                                                 <FileText className="w-4 h-4" />
                                                 {session.has_notes ? "Edit Notes" : "Add Notes"}
+                                            </button>
+                                            <button
+                                                onClick={() => session.booking_id && notifyUser(session.booking_id)}
+                                                className="w-full md:w-auto px-6 py-3 bg-orange-50 text-orange-700 font-medium rounded-xl hover:bg-orange-100 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Bell className="w-4 h-4" />
+                                                Notify User
                                             </button>
                                             {session.joining_link && (
                                                 <div className="flex items-center gap-1 text-xs text-green-600 justify-center">

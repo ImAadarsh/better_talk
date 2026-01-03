@@ -88,11 +88,19 @@ export async function POST(req: Request) {
         }
 
         // 3. Update user role to 'mentor' (even if unverified, or keep as user until verified?) 
-        // 3. Ensure role is mentor
+        // 3. Update user role to 'mentor'
         await pool.execute(
             "UPDATE users SET role = 'mentor' WHERE id = ?",
             [userId]
         );
+
+        // Send Notification
+        const { notifyTherapistApplication } = await import("@/lib/notifications");
+        await notifyTherapistApplication({
+            id: userId,
+            email: session.user.email,
+            name: fullName
+        });
 
         return NextResponse.json({ success: true });
 

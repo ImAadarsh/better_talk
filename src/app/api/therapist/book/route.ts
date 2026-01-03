@@ -50,11 +50,28 @@ export async function POST(req: Request) {
         );
 
         // 4. Create Booking Record
-        await pool.execute(
+        const [bookingResult] = await pool.execute(
             `INSERT INTO bookings (user_id, mentor_id, mentor_plan_id, mentor_slot_id, status, session_status, amount_paid_in_inr)
              VALUES (?, ?, ?, ?, 'confirmed', 'scheduled', ?)`,
             [userId, slot.mentor_id, slot.mentor_plans_id, slotId, slot.price_in_inr]
-        );
+        ) as any;
+
+        const bookingId = bookingResult.insertId;
+
+        // 5. Send Notifications
+        const [userDetails] = await pool.execute("SELECT id, name, email FROM users WHERE id = ?", [userId]) as any[];
+
+        const [mentorDetails] = await pool.execute(`
+            SELECT m.user_id, u.email, u.name 
+            FROM mentors m 
+            JOIN users u ON m.user_id = u.id 
+            WHERE m.id = ?
+        `, [slot.mentor_id]) as any[];
+
+        if (userDetails.length > 0 && mentorDetails.length > 0) {
+            const { notifyBookingCreated } = await import("@/lib/notifications");
+            await notifyBookingCreated(bookingId, userDetails[0], mentorDetails[0]);
+        }
 
         return NextResponse.json({ success: true, message: "Slot booked successfully" });
 

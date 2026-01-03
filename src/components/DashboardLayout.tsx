@@ -37,19 +37,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     // Define Navigation Items
     let navItems = [
-        { label: "Community", href: "/groups", icon: "/user_section_icons/community.png" },
-        { label: "Therapists", href: "/therapists", icon: "/user_section_icons/therapist.png" },
-        { label: "Sessions", href: "/sessions", icon: "/user_section_icons/session.png" },
-        { label: "Profile", href: "/profile", icon: "/user_section_icons/profile.png" },
+        { label: "Community", href: "/groups", icon: "/icons/user_section/community.png" },
+        { label: "Therapists", href: "/therapists", icon: "/icons/user_section/therapist.png" },
+        { label: "Sessions", href: "/sessions", icon: "/icons/user_section/session.png" },
+        { label: "Profile", href: "/profile", icon: "/icons/user_section/profile.png" },
     ];
 
     // If Mentor (Verified), Override Items
     if (session?.user && (session.user as any).role === 'mentor' && (session.user as any).is_verified) {
         navItems = [
-            { label: "Community", href: "/groups", icon: "/user_section_icons/community.png" },
-            { label: "Sessions", href: "/sessions", icon: "/user_section_icons/session.png" },
-            { label: "Profile", href: "/profile", icon: "/user_section_icons/profile.png" },
-            { label: "Schedule", href: "/therapist/schedule", icon: "/user_section_icons/session.png" },
+            { label: "Community", href: "/groups", icon: "/icons/user_section/community.png" },
+            { label: "Sessions", href: "/sessions", icon: "/icons/user_section/session.png" },
+            { label: "Profile", href: "/profile", icon: "/icons/user_section/profile.png" },
+            { label: "Schedule", href: "/therapist/schedule", icon: "/icons/user_section/session.png" },
         ];
     }
 

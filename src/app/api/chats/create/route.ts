@@ -67,6 +67,26 @@ export async function POST(req: Request) {
             [bookingId, booking.user_id, booking.mentor_id, chatStartAt, chatEndAt]
         ) as any;
 
+        // Send Chat Started Notification
+        const [users] = await pool.execute(
+            `SELECT id, name, email FROM users WHERE id IN (?, ?)`,
+            [booking.user_id, (await pool.execute("SELECT user_id FROM mentors WHERE id = ?", [booking.mentor_id]) as any[])[0][0].user_id]
+        ) as any[];
+
+        const initiatorEmail = session.user?.email;
+        const recipient = users.find((u: any) => u.email !== initiatorEmail);
+
+        if (recipient) {
+            const { sendManualNotification } = await import("@/lib/notifications"); // Reuse manual or create specific
+            // The prompt says "Email Notification ... when someone start the chat session"
+            await sendManualNotification(
+                recipient.email,
+                "New Chat Session Started",
+                `A new chat session has been started for your booking #${bookingId}. Log in to view messages.`,
+                recipient.id
+            );
+        }
+
         return NextResponse.json({
             chatId: result.insertId,
             chatEndAt: chatEndAt.toISOString()
