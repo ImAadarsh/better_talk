@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useRef } from "react";
+import { useEffect, useState, useRef, useCallback } from "react";
 import { useParams, useRouter } from "next/navigation";
 import { Send, Clock, ArrowLeft, User } from "lucide-react";
 import { format, parseISO, differenceInSeconds } from "date-fns";
@@ -38,13 +38,59 @@ export default function ChatPage() {
 
     const chatId = params.id as string;
 
+    const scrollToBottom = () => {
+        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    };
+
+    useEffect(() => {
+        scrollToBottom();
+    }, [messages]);
+
+    const fetchCurrentUser = useCallback(async () => {
+        try {
+            const res = await fetch("/api/user/me");
+            if (res.ok) {
+                const data = await res.json();
+                setCurrentUserId(data.id);
+            }
+        } catch (error) {
+            console.error("Failed to fetch current user", error);
+        }
+    }, []);
+
+    const fetchChatDetails = useCallback(async () => {
+        try {
+            const res = await fetch(`/api/chats/${chatId}`);
+            if (res.ok) {
+                setChat(await res.json());
+            } else {
+                router.push("/sessions");
+            }
+        } catch (error) {
+            console.error("Failed to fetch chat details", error);
+        } finally {
+            setLoading(false);
+        }
+    }, [chatId, router]);
+
+    const fetchMessages = useCallback(async () => {
+        try {
+            const res = await fetch(`/api/chats/${chatId}/messages`);
+            if (res.ok) {
+                setMessages(await res.json());
+            }
+        } catch (error) {
+            console.error("Failed to fetch messages", error);
+        }
+    }, [chatId]);
+
     useEffect(() => {
         fetchChatDetails();
         fetchMessages();
         fetchCurrentUser();
         const interval = setInterval(fetchMessages, 5000); // Poll every 5 seconds
         return () => clearInterval(interval);
-    }, [chatId]);
+    }, [chatId, fetchChatDetails, fetchMessages, fetchCurrentUser]);
 
     useEffect(() => {
         if (chat && !chat.isExpired) {
@@ -60,47 +106,6 @@ export default function ChatPage() {
         }
     }, [chat]);
 
-    useEffect(() => {
-        scrollToBottom();
-    }, [messages]);
-
-    const fetchCurrentUser = async () => {
-        try {
-            const res = await fetch("/api/user/me");
-            if (res.ok) {
-                const data = await res.json();
-                setCurrentUserId(data.id);
-            }
-        } catch (error) {
-            console.error("Failed to fetch current user", error);
-        }
-    };
-
-    const fetchChatDetails = async () => {
-        try {
-            const res = await fetch(`/api/chats/${chatId}`);
-            if (res.ok) {
-                setChat(await res.json());
-            } else {
-                router.push("/sessions");
-            }
-        } catch (error) {
-            console.error("Failed to fetch chat details", error);
-        } finally {
-            setLoading(false);
-        }
-    };
-
-    const fetchMessages = async () => {
-        try {
-            const res = await fetch(`/api/chats/${chatId}/messages`);
-            if (res.ok) {
-                setMessages(await res.json());
-            }
-        } catch (error) {
-            console.error("Failed to fetch messages", error);
-        }
-    };
 
     const sendMessage = async () => {
         if (!newMessage.trim() || sending || chat?.isExpired) return;
@@ -128,9 +133,7 @@ export default function ChatPage() {
         }
     };
 
-    const scrollToBottom = () => {
-        messagesEndRef.current?.scrollIntoView({ behavior: "smooth" });
-    };
+
 
     const formatTime = (seconds: number) => {
         const days = Math.floor(seconds / 86400);
