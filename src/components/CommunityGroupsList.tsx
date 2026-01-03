@@ -1,8 +1,9 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { Users, Loader2, ArrowRight, Check } from "lucide-react";
+import { Users, ArrowRight, Check } from "lucide-react";
 import Link from "next/link";
+import ScientificLoader from "@/components/ScientificLoader";
 
 interface Group {
     id: number;
@@ -41,7 +42,7 @@ export default function CommunityGroupsList({ basePath = "/groups" }: CommunityG
     if (loading) {
         return (
             <div className="flex justify-center py-20">
-                <Loader2 className="w-8 h-8 text-blue-600 animate-spin" />
+                <ScientificLoader />
             </div>
         );
     }
@@ -59,7 +60,7 @@ export default function CommunityGroupsList({ basePath = "/groups" }: CommunityG
                     return (
                         <div
                             key={group.id}
-                            className={`relative group backdrop-blur-sm rounded-2xl p-6 transition-all duration-300 hover:-translate-y-1 ${group.is_member
+                            className={`relative group backdrop-blur-sm rounded-2xl p-6 overflow-hidden transition-all duration-300 hover:-translate-y-1 ${group.is_member
                                 ? "bg-blue-600 border-2 border-blue-600 shadow-[0_8px_30px_-6px_rgba(37,99,235,0.4)]"
                                 : "bg-white/80 border border-gray-100 hover:shadow-xl hover:shadow-blue-600/10"
                                 }`}

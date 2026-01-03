@@ -5,7 +5,7 @@ import GroupDetailView from "@/components/GroupDetailView";
 
 export default function TherapistGroupDetailPage() {
     return (
-        <TherapistLayout>
+        <TherapistLayout hideMobileHeader>
             <GroupDetailView />
         </TherapistLayout>
     );

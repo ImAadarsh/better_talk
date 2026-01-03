@@ -41,7 +41,7 @@ export async function GET(
         // Fetch posts with upvote count and user status
         const [postRows] = await pool.execute(
             `SELECT p.id, p.content, p.created_at, 
-       u.anonymous_username, u.name as author_name, u.role as author_role,
+       u.anonymous_username, u.name as author_name, u.role as author_role, u.image as author_image, u.avatar_url as author_avatar,
        m.is_verified,
        (SELECT COUNT(*) FROM post_upvotes WHERE post_id = p.id) as upvote_count,
        (SELECT COUNT(*) FROM post_upvotes WHERE post_id = p.id AND user_id = ?) as has_upvoted,

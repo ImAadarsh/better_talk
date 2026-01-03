@@ -3,6 +3,8 @@
 import { useEffect, useState, useRef } from "react";
 import { Loader2, Users, MessageSquare, ThumbsUp, Send, ArrowLeft, LogOut, ChevronDown, ChevronUp, BadgeCheck, Pencil, X, Check } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
+import Image from "next/image";
+import ScientificLoader from "@/components/ScientificLoader";
 
 interface Comment {
     id: number;
@@ -13,6 +15,8 @@ interface Comment {
     is_verified?: number;
     created_at: string;
     is_author?: number;
+    author_image?: string;
+    author_avatar?: string;
 }
 
 interface Post {
@@ -27,8 +31,9 @@ interface Post {
     has_upvoted: number;
     comment_count: number;
     is_author?: number;
+    author_image?: string;
+    author_avatar?: string;
 }
-
 interface GroupDetail {
     id: number;
     name: string;
@@ -282,7 +287,7 @@ export default function GroupDetailView() {
     if (loading) {
         return (
             <div className="flex justify-center py-20">
-                <Loader2 className="w-8 h-8 text-forest-green animate-spin" />
+                <ScientificLoader />
             </div>
         );
     }
@@ -298,7 +303,7 @@ export default function GroupDetailView() {
     return (
         <div className="flex flex-col h-full relative bg-white md:bg-transparent">
             {/* Header - Collapsible */}
-            <div className={`bg-white transition-all duration-300 ease-in-out border-b border-soft-clay/30 overflow-hidden relative z-50 sticky top-0 shadow-sm ${headerCollapsed ? "py-3 px-4" : "py-8 px-8 text-center"
+            <div className={`bg-white transition-all duration-300 ease-in-out border-b border-soft-clay/30 overflow-hidden relative z-50 sticky top-0 shadow-sm ${headerCollapsed ? "py-2 md:py-3 px-3 md:px-4" : "py-4 md:py-8 px-4 md:px-8 text-center"
                 }`}>
                 {headerCollapsed ? (
                     // Collapsed State
@@ -387,7 +392,18 @@ export default function GroupDetailView() {
                                 <div className={`relative w-10 h-10 rounded-full overflow-hidden flex items-center justify-center text-white font-bold text-sm shadow-sm ${post.author_role === 'mentor' ? "bg-blue-500" : (post.anonymous_username ? getColorForUsername(post.anonymous_username) : "bg-gray-400")
                                     }`}>
                                     {post.author_role === 'mentor' ? (
-                                        <span className="text-white"><Users className="w-5 h-5" /></span>
+                                        (post.author_image || post.author_avatar) ? (
+                                            <Image
+                                                src={post.author_image || post.author_avatar || ""}
+                                                alt={post.author_name || "Mentor"}
+                                                width={40}
+                                                height={40}
+                                                className="w-full h-full object-cover"
+                                                unoptimized={true}
+                                            />
+                                        ) : (
+                                            <span className="text-white"><Users className="w-5 h-5" /></span>
+                                        )
                                     ) : (
                                         post.anonymous_username && post.anonymous_username[0].toUpperCase()
                                     )}
@@ -476,10 +492,27 @@ export default function GroupDetailView() {
                                                     <div className="flex items-center justify-between mb-1">
                                                         <div className="flex items-center gap-2">
                                                             {comment.author_role === 'mentor' && comment.is_verified === 1 ? (
-                                                                <span className="font-bold text-gray-900 text-xs flex items-center gap-1">
-                                                                    {comment.author_name}
-                                                                    <BadgeCheck className="w-3 h-3 text-blue-500 fill-blue-500 text-white" />
-                                                                </span>
+                                                                <>
+                                                                    <div className="w-6 h-6 rounded-full overflow-hidden relative bg-blue-100 flex-shrink-0">
+                                                                        {(comment.author_image || comment.author_avatar) ? (
+                                                                            <Image
+                                                                                src={comment.author_image || comment.author_avatar || ""}
+                                                                                alt={comment.author_name || "Mentor"}
+                                                                                fill
+                                                                                className="object-cover"
+                                                                                unoptimized={true}
+                                                                            />
+                                                                        ) : (
+                                                                            <div className="w-full h-full flex items-center justify-center text-blue-500">
+                                                                                <Users className="w-3 h-3" />
+                                                                            </div>
+                                                                        )}
+                                                                    </div>
+                                                                    <span className="font-bold text-gray-900 text-xs flex items-center gap-1">
+                                                                        {comment.author_name}
+                                                                        <BadgeCheck className="w-3 h-3 text-blue-500 fill-blue-500 text-white" />
+                                                                    </span>
+                                                                </>
                                                             ) : (
                                                                 <span className="font-bold text-gray-700 text-xs">{comment.anonymous_username}</span>
                                                             )}
