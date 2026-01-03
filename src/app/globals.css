@@ -142,6 +142,27 @@ body {
   animation-delay: 1.5s;
 }
 
+@keyframes snake-border {
+  0% {
+    stroke-dasharray: 0, 1500;
+    stroke-dashoffset: 0;
+  }
+
+  50% {
+    stroke-dasharray: 600, 1500;
+    stroke-dashoffset: -300;
+  }
+
+  100% {
+    stroke-dasharray: 0, 1500;
+    stroke-dashoffset: -1500;
+  }
+}
+
+.animate-snake-border {
+  animation: snake-border 3s ease-in-out infinite;
+}
+
 /* Gradient animation for text */
 @keyframes gradient {
 

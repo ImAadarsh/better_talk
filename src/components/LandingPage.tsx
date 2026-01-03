@@ -81,6 +81,22 @@ export default function LandingPage() {
         fetchFaqs();
     }, []);
 
+    // Fetch Popular Groups
+    const [popularGroups, setPopularGroups] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchGroups = async () => {
+            try {
+                const res = await fetch("/api/public/groups");
+                const data = await res.json();
+                setPopularGroups(data);
+            } catch (error) {
+                console.error("Error fetching groups:", error);
+            }
+        };
+        fetchGroups();
+    }, []);
+
     // FAQ Section
     const [activeAccordion, setActiveAccordion] = useState<number | null>(null);
 
@@ -113,14 +129,14 @@ export default function LandingPage() {
                         <path d="M 0,710 Q 180,670 360,710 T 720,710 T 1200,710" stroke="url(#gradient2)" strokeWidth="1.5" fill="none" className="animate-snake-1" opacity="0.25" style={{ animationDelay: '3.5s' }} />
                         <defs>
                             <linearGradient id="gradient1" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.5" />
-                                <stop offset="50%" stopColor="#06B6D4" stopOpacity="0.5" />
-                                <stop offset="100%" stopColor="#4F46E5" stopOpacity="0.5" />
+                                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.5" />
+                                <stop offset="50%" stopColor="#ea580c" stopOpacity="0.5" />
+                                <stop offset="100%" stopColor="#9333ea" stopOpacity="0.5" />
                             </linearGradient>
                             <linearGradient id="gradient2" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.5" />
-                                <stop offset="50%" stopColor="#4F46E5" stopOpacity="0.5" />
-                                <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.5" />
+                                <stop offset="0%" stopColor="#ea580c" stopOpacity="0.5" />
+                                <stop offset="50%" stopColor="#9333ea" stopOpacity="0.5" />
+                                <stop offset="100%" stopColor="#ea580c" stopOpacity="0.5" />
                             </linearGradient>
                         </defs>
                     </svg>
@@ -135,14 +151,14 @@ export default function LandingPage() {
                         <path d="M 1050,0 Q 1030,120 1050,240 T 1050,480 T 1050,720 T 1050,800" stroke="url(#gradient3)" strokeWidth="1.5" fill="none" className="animate-snake-vertical-1" opacity="0.2" style={{ animationDelay: '1.8s' }} />
                         <defs>
                             <linearGradient id="gradient3" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stopColor="#4F46E5" stopOpacity="0.35" />
-                                <stop offset="50%" stopColor="#06B6D4" stopOpacity="0.35" />
-                                <stop offset="100%" stopColor="#4F46E5" stopOpacity="0.35" />
+                                <stop offset="0%" stopColor="#9333ea" stopOpacity="0.35" />
+                                <stop offset="50%" stopColor="#ea580c" stopOpacity="0.35" />
+                                <stop offset="100%" stopColor="#9333ea" stopOpacity="0.35" />
                             </linearGradient>
                             <linearGradient id="gradient4" x1="0%" y1="0%" x2="0%" y2="100%">
-                                <stop offset="0%" stopColor="#06B6D4" stopOpacity="0.35" />
-                                <stop offset="50%" stopColor="#4F46E5" stopOpacity="0.35" />
-                                <stop offset="100%" stopColor="#06B6D4" stopOpacity="0.35" />
+                                <stop offset="0%" stopColor="#ea580c" stopOpacity="0.35" />
+                                <stop offset="50%" stopColor="#9333ea" stopOpacity="0.35" />
+                                <stop offset="100%" stopColor="#ea580c" stopOpacity="0.35" />
                             </linearGradient>
                         </defs>
                     </svg>
@@ -236,7 +252,7 @@ export default function LandingPage() {
             </main>
 
             {/* Features Grid */}
-            <section className="py-20 bg-[#2F3E35] text-white">
+            <section className="py-20 text-white" style={{ background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}>
                 <div className="max-w-7xl mx-auto px-6">
                     <motion.div
                         initial={{ opacity: 0, y: 20 }}
@@ -310,7 +326,7 @@ export default function LandingPage() {
             </section>
 
             {/* Deep Dive: Mentorship */}
-            <section id="deep-dive-mentorship" className="py-24 px-6 bg-[#2F3E35] text-white">
+            <section id="deep-dive-mentorship" className="py-24 px-6 text-white" style={{ background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}>
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row-reverse items-center gap-16">
                     <motion.div
                         initial={{ opacity: 0, x: 50 }}
@@ -343,9 +359,18 @@ export default function LandingPage() {
                         <div className="relative bg-white/10 p-8 rounded-3xl border border-white/10 shadow-2xl backdrop-blur-sm">
                             <div className="flex items-center justify-between mb-8">
                                 <div className="flex items-center gap-4">
-                                    <div className="w-14 h-14 bg-gray-200 rounded-full"></div>
+                                    <div className="w-14 h-14 relative rounded-full overflow-hidden border-2 border-white/20">
+                                        <Image
+                                            src="/doctor-image.jpg"
+                                            alt="Dr. Pratik Mehra"
+                                            width={56}
+                                            height={56}
+                                            className="object-cover"
+                                            unoptimized={true}
+                                        />
+                                    </div>
                                     <div>
-                                        <div className="text-lg font-bold text-white">Dr. Sarah Smith</div>
+                                        <div className="text-lg font-bold text-white">Dr. Pratik Mehra</div>
                                         <div className="text-gray-300 text-sm">Clinical Psychologist</div>
                                     </div>
                                 </div>
@@ -368,55 +393,29 @@ export default function LandingPage() {
 
             {/* Deep Dive: Groups */}
             <section id="deep-dive-groups" className="py-24 px-6 bg-blue-50/30 overflow-hidden">
-                <div className="max-w-7xl mx-auto flex flex-col md:flex-row items-center gap-16">
-                    <motion.div
-                        initial={{ opacity: 0, x: -50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
-                        viewport={{ once: true }}
-                        transition={{ duration: 0.8 }}
-                        className="md:w-1/2"
-                    >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold mb-6 uppercase tracking-wider">Community</div>
+                <div className="max-w-7xl mx-auto">
+                    <div className="text-center mb-16">
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-bold mb-4 uppercase tracking-wider">Community</div>
                         <h2 className="text-4xl font-bold text-gray-900 mb-6">Find your tribe.</h2>
-                        <p className="text-lg text-gray-500 mb-8 leading-relaxed">
-                            Join specialized groups for Anxiety, Relationships, Career Stress, and more. Share your thoughts, comment on others&apos; posts, and feel the power of shared experience.
+                        <p className="text-lg text-gray-500 max-w-2xl mx-auto leading-relaxed">
+                            Join specialized groups for Anxiety, Relationships, Career Stress, and more.
                         </p>
-                        <ul className="space-y-4 mb-8">
-                            <li className="flex items-center gap-3 text-gray-700">
-                                <CheckCircle className="w-5 h-5 text-green-500" /> Moderated safe spaces
-                            </li>
-                            <li className="flex items-center gap-3 text-gray-700">
-                                <CheckCircle className="w-5 h-5 text-green-500" /> Anonymous posting
-                            </li>
-                            <li className="flex items-center gap-3 text-gray-700">
-                                <CheckCircle className="w-5 h-5 text-green-500" /> verified Therapist participation
-                            </li>
-                        </ul>
-                        <Link href="/register" className="text-brand-primary font-bold hover:underline flex items-center gap-2">Explore Groups <ArrowRight className="w-4 h-4" /></Link>
-                    </motion.div>
+                    </div>
 
-                    {/* Visual Placeholder for Groups */}
-                    <div className="md:w-1/2 relative">
-                        <div className="absolute inset-0 bg-gradient-to-tr from-blue-200 to-transparent rounded-full blur-3xl opacity-50"></div>
-                        <div className="relative bg-white p-8 rounded-3xl shadow-xl border border-gray-100">
-                            <div className="flex gap-4 items-center mb-6">
-                                <div className="w-10 h-10 bg-blue-100 rounded-full flex items-center justify-center"><Users className="w-5 h-5 text-blue-600" /></div>
-                                <div>
-                                    <div className="font-bold">Anxiety Support</div>
-                                    <div className="text-xs text-gray-400">1.2k Members</div>
-                                </div>
-                            </div>
-                            <div className="space-y-3">
-                                <div className="h-2 bg-gray-100 rounded w-full"></div>
-                                <div className="h-2 bg-gray-100 rounded w-3/4"></div>
-                            </div>
-                        </div>
+                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8">
+                        {popularGroups.map((group) => (
+                            <GroupCard key={group.id} group={group} />
+                        ))}
+                    </div>
+
+                    <div className="text-center mt-12">
+                        <Link href="/register" className="inline-flex items-center gap-2 text-brand-primary font-bold hover:underline text-lg">Create Account to Explore Groups <ArrowRight className="w-5 h-5" /></Link>
                     </div>
                 </div>
             </section>
 
             {/* CTA for Therapists */}
-            <section className="py-20 px-6 bg-[#2F3E35] text-white overflow-hidden relative">
+            <section className="py-20 px-6 text-white overflow-hidden relative" style={{ background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}>
                 <div className="absolute top-0 right-0 w-[600px] h-[600px] bg-[#4A6756]/30 rounded-full blur-3xl -translate-y-1/2 translate-x-1/2 pointer-events-none" />
                 <div className="max-w-4xl mx-auto text-center relative z-10">
                     <h2 className="text-3xl md:text-5xl font-bold mb-6">Are you a licensed therapist?</h2>
@@ -466,15 +465,67 @@ function FeatureCard({ icon, title, desc, color }: { icon: any, title: string, d
             viewport={{ once: true }}
             whileHover={{ y: -5 }}
             transition={{ duration: 0.5 }}
-            className="group bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300"
+            className="group bg-white p-8 rounded-3xl relative overflow-hidden shadow-sm hover:shadow-xl hover:shadow-gray-200/50 transition-all duration-300"
         >
-            <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300`}>
+            {/* Snake Border Animation */}
+            <div className="absolute inset-0 pointer-events-none p-[2px]">
+                <svg className="w-full h-full" preserveAspectRatio="none">
+                    <rect x="0" y="0" width="100%" height="100%" rx="22" ry="22" fill="none" strokeWidth="2" className="stroke-blue-500/30 group-hover:stroke-blue-500 transition-colors duration-300" />
+                    <rect x="0" y="0" width="100%" height="100%" rx="22" ry="22" fill="none" strokeWidth="2" className="stroke-blue-500 animate-snake-border opacity-0 group-hover:opacity-100 transition-opacity duration-300" />
+                </svg>
+            </div>
+
+            <div className={`w-14 h-14 ${color} rounded-2xl flex items-center justify-center mb-6 group-hover:scale-110 transition-transform duration-300 relative z-10`}>
                 {icon}
             </div>
-            <h3 className="text-xl font-bold text-gray-900 mb-3">{title}</h3>
-            <p className="text-gray-500 leading-relaxed">
+            <h3 className="text-xl font-bold text-gray-900 mb-3 relative z-10">{title}</h3>
+            <p className="text-gray-500 leading-relaxed relative z-10">
                 {desc}
             </p>
+        </motion.div>
+    );
+}
+
+function GroupCard({ group }: { group: any }) {
+    // Generate a consistent color based on group ID
+    const colors = [
+        "bg-blue-50 text-blue-600",
+        "bg-purple-50 text-purple-600",
+        "bg-rose-50 text-rose-600",
+        "bg-amber-50 text-amber-600",
+        "bg-emerald-50 text-emerald-600",
+        "bg-indigo-50 text-indigo-600",
+    ];
+    const colorClass = colors[group.id % colors.length];
+
+    return (
+        <motion.div
+            initial={{ opacity: 0, y: 30 }}
+            whileInView={{ opacity: 1, y: 0 }}
+            viewport={{ once: true }}
+            whileHover={{ y: -8 }}
+            transition={{ duration: 0.4 }}
+            className="bg-white p-8 rounded-3xl border border-gray-100 shadow-sm hover:shadow-xl hover:shadow-blue-500/10 transition-all duration-300 relative overflow-hidden group"
+        >
+            <div className="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-blue-400 to-purple-500 transform scale-x-0 group-hover:scale-x-100 transition-transform duration-500 origin-left"></div>
+
+            <div className="flex justify-between items-start mb-6">
+                <div className={`w-14 h-14 rounded-2xl flex items-center justify-center ${colorClass}`}>
+                    <Users className="w-7 h-7" />
+                </div>
+                <span className="text-xs font-bold text-gray-500 bg-gray-50 px-3 py-1 rounded-full border border-gray-100">
+                    {group.member_count} Members
+                </span>
+            </div>
+
+            <h3 className="text-xl font-bold text-gray-900 mb-3 group-hover:text-blue-600 transition-colors">{group.name}</h3>
+            <p className="text-gray-500 text-sm leading-relaxed mb-6 line-clamp-2">
+                {group.description}
+            </p>
+
+            <Link href="/groups" className="inline-flex items-center text-sm font-bold text-gray-900 group-hover:text-blue-600 transition-colors">
+                Join Community <ArrowRight className="w-4 h-4 ml-2 group-hover:translate-x-1 transition-transform" />
+            </Link>
         </motion.div>
     );
 }
