@@ -61,23 +61,45 @@ export async function POST(request: Request) {
             return NextResponse.json({ error: "Missing required fields" }, { status: 400 });
         }
 
-        // Verify booking ownership and completion status
+        // Get internal User ID from DB
+        const [users] = await pool.execute("SELECT id FROM users WHERE email = ?", [session.user?.email]) as any[];
+
+        if (users.length === 0) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        const userId = users[0].id;
+
+        // Verify booking ownership
         const [bookings] = await pool.execute(`
             SELECT * FROM bookings 
-            WHERE id = ? AND user_id = ? AND session_status = 'completed'
-        `, [booking_id, (session.user as any).id]) as any[];
+            WHERE id = ?
+        `, [booking_id]) as any[];
 
         if (bookings.length === 0) {
-            return NextResponse.json({ error: "Invalid booking or session not completed" }, { status: 403 });
+            return NextResponse.json({ error: `Booking #${booking_id} not found locally` }, { status: 404 });
         }
 
         const booking = bookings[0];
+
+        // Check User ID mismatch
+        if (booking.user_id != userId) {
+            return NextResponse.json({
+                error: `Unauthorized: Booking User ID (${booking.user_id}) does not match Session User ID (${userId})`
+            }, { status: 403 });
+        }
+
+        if (booking.session_status !== 'completed') {
+            return NextResponse.json({
+                error: `Cannot review session. Status is '${booking.session_status}', must be 'completed'`
+            }, { status: 400 });
+        }
 
         // Insert Review
         await pool.execute(`
             INSERT INTO reviews (booking_id, user_id, mentor_id, rating, review_text, status)
             VALUES (?, ?, ?, ?, ?, 'pending')
-        `, [booking_id, (session.user as any).id, booking.mentor_id, rating, review_text]);
+        `, [booking_id, userId, booking.mentor_id, rating, review_text]);
 
         return NextResponse.json({ message: "Review submitted successfully" });
 

@@ -19,7 +19,8 @@ import {
     HelpCircle,
     CreditCard,
     BarChart3,
-    Star
+    Star,
+    Bell
 } from "lucide-react";
 import Image from "next/image";
 
@@ -64,6 +65,12 @@ const menuGroups = [
         items: [
             { name: "FAQs", href: "/adx/faqs", icon: HelpCircle },
             { name: "Contact Inquiries", href: "/adx/messages", icon: MessageSquare },
+        ]
+    },
+    {
+        title: "System",
+        items: [
+            { name: "Notification Logs", href: "/adx/notification-logs", icon: Bell },
         ]
     }
 ];

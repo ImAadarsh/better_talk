@@ -18,7 +18,8 @@ export async function GET(
 
         // 1. Fetch Mentor Details
         const [mentorRows] = await pool.execute(
-            `SELECT m.id, u.name, m.designation, m.headlines, m.patients_treated, u.image, m.updated_at as experience_start_date 
+            `SELECT m.id, u.name, m.designation, m.headlines, m.patients_treated, u.image, m.updated_at as experience_start_date,
+             (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE mentor_id = m.id) as average_rating 
              FROM mentors m 
              JOIN users u ON m.user_id = u.id 
              WHERE m.id = ?`,

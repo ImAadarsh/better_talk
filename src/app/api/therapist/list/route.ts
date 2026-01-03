@@ -15,7 +15,8 @@ export async function GET() {
 
         // Fetch all verified Therapists
         const [rows] = await pool.execute(
-            `SELECT m.id, u.name, m.designation, m.headlines, m.patients_treated, u.image, u.avatar_url 
+            `SELECT m.id, u.name, m.designation, m.headlines, m.patients_treated, u.image, u.avatar_url,
+             (SELECT COALESCE(AVG(rating), 0) FROM reviews WHERE mentor_id = m.id) as average_rating 
              FROM mentors m 
              JOIN users u ON m.user_id = u.id 
              WHERE m.is_verified = 1`

@@ -97,6 +97,24 @@ export default function LandingPage() {
         fetchGroups();
     }, []);
 
+    // Fetch Stats
+    const [stats, setStats] = useState({ memberCount: 0, averageRating: 0 });
+
+    useEffect(() => {
+        const fetchStats = async () => {
+            try {
+                const res = await fetch("/api/public/stats");
+                if (res.ok) {
+                    const data = await res.json();
+                    setStats(data);
+                }
+            } catch (error) {
+                console.error("Error fetching stats:", error);
+            }
+        };
+        fetchStats();
+    }, []);
+
     // FAQ Section
     const [activeAccordion, setActiveAccordion] = useState<number | null>(null);
 
@@ -106,7 +124,7 @@ export default function LandingPage() {
 
             {/* Hero Section */}
             <main id="welcome" ref={welcomeRef} className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
-                {/* Background Gradients */}
+                {/* ... existing background code ... */}
                 <motion.div
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 0.6 }}
@@ -182,7 +200,7 @@ export default function LandingPage() {
                         className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 leading-[1.1]"
                     >
                         Find your inner <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">peace and clarity.</span>
+                        <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}>peace and clarity.</span>
                     </motion.h1>
 
                     <motion.p
@@ -213,7 +231,7 @@ export default function LandingPage() {
                         initial={{ opacity: 0 }}
                         animate={{ opacity: 1 }}
                         transition={{ duration: 1, delay: 0.8 }}
-                        className="mt-16 flex items-center justify-center gap-8 md:gap-12 grayscale opacity-60 hover:grayscale-0 hover:opacity-100 transition-all duration-500"
+                        className="mt-16 flex items-center justify-center gap-8 md:gap-12"
                     >
                         <div className="flex items-center gap-2">
                             <div className="flex -space-x-3">
@@ -232,7 +250,7 @@ export default function LandingPage() {
                             </div>
 
                             <div className="text-left">
-                                <p className="text-sm font-bold text-gray-900">10k+</p>
+                                <p className="text-sm font-bold text-gray-900">{stats.memberCount > 0 ? `${stats.memberCount}+` : "10k+"}</p>
                                 <p className="text-xs text-gray-500">Members</p>
                             </div>
                         </div>
@@ -245,7 +263,7 @@ export default function LandingPage() {
                                 <Star className="w-4 h-4 fill-current" />
                                 <Star className="w-4 h-4 fill-current" />
                             </div>
-                            <p className="text-xs text-gray-500">Rated 4.9/5 by users</p>
+                            <p className="text-xs text-gray-500">Rated {stats.averageRating > 0 ? stats.averageRating.toFixed(1) : "4.9"}/5 by users</p>
                         </div>
                     </motion.div>
                 </div>

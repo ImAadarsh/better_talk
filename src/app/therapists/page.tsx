@@ -15,6 +15,7 @@ interface Therapist {
     patients_treated: number;
     image?: string;
     avatar_url?: string;
+    average_rating: string | number;
 }
 
 export default function TherapistsPage() {
@@ -107,7 +108,9 @@ export default function TherapistsPage() {
                                     <div className="w-px h-8 bg-gray-100"></div>
                                     <div className="flex items-center gap-1.5">
                                         <Star className="w-4 h-4 text-amber-400 fill-amber-400" />
-                                        <span className="text-sm font-bold text-gray-900">4.9</span>
+                                        <span className="text-sm font-bold text-gray-900">
+                                            {Number(therapist.average_rating) > 0 ? Number(therapist.average_rating).toFixed(1) : "New"}
+                                        </span>
                                         <span className="text-xs text-gray-400 font-medium">Rating</span>
                                     </div>
                                 </div>

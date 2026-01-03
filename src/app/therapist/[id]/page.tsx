@@ -23,6 +23,7 @@ interface Therapist {
     patients_treated: number;
     image?: string;
     experience_start_date: string;
+    average_rating: string | number;
 }
 
 interface Slot {
@@ -246,7 +247,9 @@ export default function TherapistProfilePage() {
                                     <Star className="w-5 h-5 fill-current" />
                                 </div>
                                 <div className="text-left">
-                                    <p className="text-xl font-bold text-gray-900">4.9</p>
+                                    <p className="text-xl font-bold text-gray-900">
+                                        {Number(therapist.average_rating) > 0 ? Number(therapist.average_rating).toFixed(1) : "New"}
+                                    </p>
                                     <p className="text-xs text-gray-400 font-medium uppercase">Rating</p>
                                 </div>
                             </div>

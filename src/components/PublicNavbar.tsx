@@ -12,6 +12,7 @@ export default function PublicNavbar() {
     const navLinks = [
         { label: "Home", href: "/" },
         { label: "About", href: "/about" },
+        { label: "Stories", href: "/stories" },
         { label: "Contact", href: "/contact" },
         { label: "FAQ", href: "/faq" },
     ];
@@ -32,7 +33,7 @@ export default function PublicNavbar() {
                             />
                         </div>
                         <span className="text-xl font-bold text-gray-900">
-                            Better<span className="text-brand-primary">Talk</span>
+                            Better<span className="text-blue-600">Talk</span>
                         </span>
                     </Link>
 
@@ -42,7 +43,7 @@ export default function PublicNavbar() {
                             <Link
                                 key={link.href}
                                 href={link.href}
-                                className="text-gray-600 hover:text-brand-primary font-medium transition-colors"
+                                className="text-gray-600 hover:text-blue-600 font-medium transition-colors"
                             >
                                 {link.label}
                             </Link>
@@ -118,7 +119,9 @@ export default function PublicNavbar() {
                                         />
                                     </div>
                                     <div>
-                                        <h2 className="text-lg font-bold text-gray-900">BetterTalk</h2>
+                                        <h2 className="text-lg font-bold text-gray-900">
+                                            Better<span className="text-blue-600">Talk</span>
+                                        </h2>
                                         <p className="text-xs text-gray-500">Your mental wellness companion</p>
                                     </div>
                                 </div>
