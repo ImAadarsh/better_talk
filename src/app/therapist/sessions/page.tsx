@@ -4,7 +4,7 @@ import { useEffect, useState } from "react";
 import Image from "next/image";
 import TherapistLayout from "@/components/TherapistLayout";
 import { Calendar, Clock, User, FileText, MessageCircle, Link as LinkIcon, X, CheckCircle, Bell } from "lucide-react";
-import { format, isPast, parseISO, addDays, differenceInSeconds } from "date-fns";
+import { format, isPast, parseISO, addDays, differenceInSeconds, isSameDay } from "date-fns";
 import ScientificLoader from "@/components/ScientificLoader";
 
 interface Session {
@@ -35,6 +35,24 @@ export default function TherapistSessionsPage() {
     const [notes, setNotes] = useState("");
     const [joiningLink, setJoiningLink] = useState("");
     const [saving, setSaving] = useState(false);
+
+    // Reschedule State
+    const [showRescheduleModal, setShowRescheduleModal] = useState(false);
+    const [availableSlots, setAvailableSlots] = useState<any[]>([]);
+    const [selectedDate, setSelectedDate] = useState<Date>(new Date());
+    const [rescheduling, setRescheduling] = useState(false);
+
+    const uniqueDateStrings = Array.from(new Set(
+        availableSlots
+            .filter(s => s.is_booked === 0)
+            .map(s => format(parseISO(s.start_time), 'yyyy-MM-dd'))
+    )).sort();
+
+    const availableDates = uniqueDateStrings.map(d => parseISO(d));
+
+    const daySlots = availableSlots.filter(s =>
+        isSameDay(parseISO(s.start_time), selectedDate) && s.is_booked === 0
+    );
 
     useEffect(() => {
         fetchSessions();
@@ -156,6 +174,53 @@ export default function TherapistSessionsPage() {
         }
     };
 
+    const fetchMySlots = async () => {
+        try {
+            const start = new Date().toISOString();
+            const end = addDays(new Date(), 90).toISOString();
+            const res = await fetch(`/api/therapist/slots?start=${start}&end=${end}`);
+            if (res.ok) {
+                const data = await res.json();
+                setAvailableSlots(data.slots || []);
+            }
+        } catch (error) {
+            console.error("Failed to fetch slots", error);
+        }
+    };
+
+    const handleReschedule = async (newSlotId: number) => {
+        if (!selectedSession || !selectedSession.booking_id) return;
+        if (!confirm("Are you sure you want to reschedule this session?")) return;
+
+        setRescheduling(true);
+        try {
+            const res = await fetch(`/api/bookings/${selectedSession.booking_id}/reschedule`, {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ newSlotId }),
+            });
+
+            if (res.ok) {
+                alert("Session rescheduled successfully!");
+                setShowRescheduleModal(false);
+                fetchSessions();
+            } else {
+                const err = await res.json();
+                alert(`Failed to reschedule: ${err.error}`);
+            }
+        } catch (error) {
+            console.error("Reschedule error:", error);
+        } finally {
+            setRescheduling(false);
+        }
+    };
+
+    const openRescheduleModal = async (session: Session) => {
+        setSelectedSession(session);
+        await fetchMySlots();
+        setShowRescheduleModal(true);
+    };
+
     const handleOpenChat = async (bookingId: number) => {
         try {
             const res = await fetch("/api/chats/create", {
@@ -188,12 +253,10 @@ export default function TherapistSessionsPage() {
 
     return (
         <TherapistLayout>
-            <div className="max-w-5xl mx-auto pb-32">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Sessions</h1>
-                        <p className="text-gray-600">Manage your scheduled therapy sessions.</p>
-                    </div>
+            <div className="w-full pb-32">
+                <div className="mb-6 md:mb-10">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Sessions</h1>
+                    <p className="text-sm md:text-base text-gray-500 mt-1">Manage your scheduled therapy sessions.</p>
                 </div>
 
                 {/* Tabs */}
@@ -287,6 +350,13 @@ export default function TherapistSessionsPage() {
                                             >
                                                 <LinkIcon className="w-4 h-4" />
                                                 {session.joining_link ? "Edit Link" : "Add Link"}
+                                            </button>
+                                            <button
+                                                onClick={() => openRescheduleModal(session)}
+                                                className="w-full md:w-auto px-6 py-3 bg-amber-50 text-amber-700 font-medium rounded-xl hover:bg-amber-100 transition-all flex items-center justify-center gap-2"
+                                            >
+                                                <Calendar className="w-4 h-4" />
+                                                Reschedule
                                             </button>
                                             <button
                                                 onClick={() => openNotesModal(session)}
@@ -401,6 +471,78 @@ export default function TherapistSessionsPage() {
                                 >
                                     Cancel
                                 </button>
+                            </div>
+                        </div>
+                    </div>
+                )}
+                {/* Reschedule Modal */}
+                {showRescheduleModal && selectedSession && (
+                    <div className="fixed inset-0 z-[60] flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowRescheduleModal(false)}>
+                        <div className="bg-white rounded-3xl p-6 w-full max-w-4xl shadow-2xl max-h-[90vh] overflow-hidden flex flex-col" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-4 border-b border-gray-100 pb-4">
+                                <div>
+                                    <h3 className="text-xl font-bold text-gray-900">Reschedule Session</h3>
+                                    <p className="text-sm text-gray-500">Select a new slot for Session #{selectedSession.id}</p>
+                                </div>
+                                <button onClick={() => setShowRescheduleModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+
+                            <div className="flex-1 overflow-y-auto min-h-0 space-y-6">
+                                {/* Date Picker */}
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                        <Calendar className="w-4 h-4 text-brand-primary" /> Select Date
+                                    </h4>
+                                    <div className="flex overflow-x-auto pb-2 gap-2 no-scrollbar">
+                                        {availableDates.map((date) => {
+                                            const isSelected = selectedDate ? isSameDay(date, selectedDate) : false;
+                                            return (
+                                                <button
+                                                    key={date.toISOString()}
+                                                    onClick={() => setSelectedDate(date)}
+                                                    className={`shrink-0 w-16 h-20 rounded-xl flex flex-col items-center justify-center gap-1 transition-all border ${isSelected
+                                                        ? "bg-brand-primary text-white border-brand-primary shadow-lg"
+                                                        : "bg-white text-gray-600 border-gray-200 hover:bg-gray-50"
+                                                        }`}
+                                                >
+                                                    <span className="text-[10px] uppercase font-bold">{format(date, "EEE")}</span>
+                                                    <span className="text-xl font-bold">{format(date, "d")}</span>
+                                                </button>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+
+                                {/* Slots */}
+                                <div>
+                                    <h4 className="font-semibold text-gray-900 mb-3 flex items-center gap-2">
+                                        <Clock className="w-4 h-4 text-brand-primary" /> Available Slots
+                                    </h4>
+                                    {daySlots.length === 0 ? (
+                                        <div className="p-8 text-center bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                                            <p className="text-gray-500 text-sm">No available slots for this date.</p>
+                                        </div>
+                                    ) : (
+                                        <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
+                                            {daySlots.map((slot: any) => (
+                                                <button
+                                                    key={slot.id}
+                                                    onClick={() => handleReschedule(slot.id)}
+                                                    disabled={rescheduling}
+                                                    className="py-3 px-2 rounded-xl border border-blue-100 bg-blue-50/50 text-blue-700 text-sm font-semibold hover:bg-brand-primary hover:text-white hover:border-brand-primary transition-all shadow-sm disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    {rescheduling ? "Rescheduling..." : format(parseISO(slot.start_time), "h:mm a")}
+                                                </button>
+                                            ))}
+                                        </div>
+                                    )}
+                                </div>
+                            </div>
+
+                            <div className="pt-4 border-t border-gray-100 mt-4 text-xs text-gray-400 text-center">
+                                Note: Rescheduling will notify the user immediately.
                             </div>
                         </div>
                     </div>

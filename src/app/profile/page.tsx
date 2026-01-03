@@ -85,7 +85,7 @@ export default function ProfilePage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-4xl mx-auto space-y-8 animate-fade-in">
+            <div className="w-full space-y-8 animate-fade-in">
                 {/* Profile Header */}
                 <div className="bg-white p-8 rounded-3xl shadow-sm border border-soft-clay/30 flex flex-col md:flex-row items-center md:items-start gap-8 relative">
                     <button
@@ -137,7 +137,8 @@ export default function ProfilePage() {
                                     <button
                                         onClick={handleSaveProfile}
                                         disabled={savingProfile}
-                                        className="px-4 py-2 text-sm bg-brand-primary text-white rounded-lg hover:bg-brand-primary/90"
+                                        style={{ background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}
+                                        className="px-4 py-2 text-sm text-white rounded-lg hover:opacity-90 transition-all shadow-md shadow-blue-500/20"
                                     >
                                         {savingProfile ? "Saving..." : "Save Changes"}
                                     </button>

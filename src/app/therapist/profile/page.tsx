@@ -168,7 +168,7 @@ export default function TherapistProfilePage() {
 
     return (
         <TherapistLayout>
-            <div className="max-w-5xl mx-auto space-y-8 pb-10">
+            <div className="w-full space-y-8 pb-10">
                 {/* Header / Main Card */}
                 <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100 relative overflow-hidden">
                     <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-r from-blue-600 to-blue-400 opacity-10"></div>

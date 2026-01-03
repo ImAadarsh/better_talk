@@ -39,10 +39,10 @@ export default function TherapistsPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 pb-32">
-                <div className="mb-10 text-center md:text-left">
-                    <h1 className="text-3xl font-bold text-gray-900 mb-3">Find Your Therapist</h1>
-                    <p className="text-gray-600 max-w-2xl text-lg">
+            <div className="w-full px-4 md:px-8 py-8 pb-32">
+                <div className="mb-6 md:mb-10 text-center md:text-left">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">Find Your Therapist</h1>
+                    <p className="text-sm md:text-base text-gray-600 max-w-2xl mt-1">
                         Connect with verified professionals who can help you navigate life&apos;s challenges.
                     </p>
                 </div>
@@ -114,7 +114,8 @@ export default function TherapistsPage() {
 
                                 <Link
                                     href={`/therapist/${therapist.id}`}
-                                    className="block w-full bg-gray-900 text-white text-center font-medium py-3.5 rounded-xl hover:bg-brand-primary transition-colors shadow-lg shadow-gray-200 hover:shadow-brand-primary/25"
+                                    style={{ background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}
+                                    className="block w-full text-white text-center font-medium py-3.5 rounded-xl hover:opacity-90 transition-all shadow-lg shadow-blue-500/20"
                                 >
                                     Book Session
                                 </Link>

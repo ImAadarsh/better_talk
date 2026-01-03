@@ -66,11 +66,9 @@ export default function TherapistProfilePage() {
         if (params.id) fetchData();
     }, [params.id, router]);
 
-    // Generate next 14 days and filter to only those with available slots
-    const allDates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i));
-    const dates = allDates.filter(date =>
-        slots.some(slot => isSameDay(parseISO(slot.start_time), date))
-    );
+    // Derived unique dates from available slots
+    const uniqueDateStrings = Array.from(new Set(slots.map(slot => format(parseISO(slot.start_time), 'yyyy-MM-dd')))).sort();
+    const dates = uniqueDateStrings.map(dateStr => parseISO(dateStr));
 
     // Filter slots for selected date
     const daySlots = slots.filter(slot => isSameDay(parseISO(slot.start_time), selectedDate));

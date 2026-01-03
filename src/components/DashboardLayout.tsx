@@ -59,9 +59,14 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             {/* Sidebar (Desktop) */}
             <aside className="hidden md:flex flex-col w-64 bg-white border-r border-gray-100">
                 <div className="p-8">
-                    <h1 className="text-2xl font-bold bg-gradient-to-r from-brand-primary to-blue-600 bg-clip-text text-transparent">
-                        BetterTalk
-                    </h1>
+                    <div className="flex items-center gap-2">
+                        <div className="relative w-8 h-8">
+                            <Image src="/better-talk-logo.png" alt="Logo" width={32} height={32} className="object-contain w-full h-full" />
+                        </div>
+                        <h1 className="text-xl font-bold text-gray-900 tracking-tight">
+                            Better<span className="text-blue-600">Talk</span>
+                        </h1>
+                    </div>
                 </div>
 
                 <nav className="flex-1 px-4 space-y-2">
@@ -71,8 +76,9 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                             <Link
                                 key={item.href}
                                 href={item.href}
+                                style={active ? { background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' } : {}}
                                 className={`flex items-center gap-3 px-4 py-3 rounded-xl transition-all duration-200 group ${active
-                                    ? "bg-brand-primary text-white shadow-lg shadow-brand-primary/25 translate-x-1"
+                                    ? "text-white shadow-lg shadow-blue-500/20 translate-x-1"
                                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1"
                                     }`}
                             >
@@ -114,7 +120,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
             </aside>
 
             {/* Main Content */}
-            <main className={`flex-1 relative bg-brand-bg md:overflow-hidden overflow-x-hidden ${isGroupDetail ? 'overflow-y-hidden h-full flex flex-col' : 'overflow-y-auto'}`}>
+            <main className={`flex-1 relative bg-brand-bg overflow-x-hidden ${isGroupDetail ? 'overflow-y-hidden h-full flex flex-col' : 'overflow-y-auto'}`}>
                 {/* Mobile Header - Hidden on Group Detail */}
                 {!isGroupDetail && (
                     <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
@@ -126,8 +132,8 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 height={32}
                                 className="w-8 h-8 object-contain"
                             />
-                            <h1 className="text-lg font-bold bg-gradient-to-r from-brand-primary to-blue-600 bg-clip-text text-transparent">
-                                BetterTalk
+                            <h1 className="text-lg font-bold text-gray-900">
+                                Better<span className="text-blue-600">Talk</span>
                             </h1>
                         </div>
 
@@ -181,7 +187,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                     </div>
                 )}
 
-                <div className={`h-full ${isGroupDetail ? 'p-0' : 'p-4 md:p-8 max-w-5xl mx-auto pb-40 md:pb-8'}`}>
+                <div className={`h-full ${isGroupDetail ? 'p-0' : 'p-4 md:p-8 w-full pb-40 md:pb-8'}`}>
                     {children}
                 </div>
             </main>

@@ -161,10 +161,60 @@ export const NOTIFICATION_TYPES = {
     BOOKING_CREATED: 'booking_created',
     JOINING_LINK_ADDED: 'joining_link_added',
     CHAT_STARTED: 'chat_started',
-    MANUAL_ALERT: 'manual_alert'
+    MANUAL_ALERT: 'manual_alert',
+    RESCHEDULED: 'rescheduled'
 };
 
 // --- Notifications ---
+
+// X. Reschedule Notifications
+export async function notifyRescheduleByTherapist(
+    bookingId: number,
+    user: { id: number; email: string; name: string },
+    newDate: Date
+) {
+    const dateStr = newDate.toLocaleString();
+
+    // To User
+    const userHtml = generateEmailHtml({
+        title: "Session Rescheduled 🗓️",
+        body: `<p>Hi ${user.name},</p><p> Your therapist has rescheduled your upcoming session due to a scheduling conflict.</p><p>Please check the new details below.</p>`,
+        actionLabel: "View New Details",
+        actionUrl: `${BASE_URL}/sessions`,
+        details: [
+            { label: "Booking ID", value: `#${bookingId}` },
+            { label: "New Date & Time", value: dateStr }
+        ]
+    });
+    const result = await sendEmail({ to: user.email, subject: "Session Rescheduled - BetterTalk", html: userHtml });
+
+    await logNotification(user.id, NOTIFICATION_TYPES.RESCHEDULED, 'booking', bookingId, result.success ? 'success' : 'failed', "Rescheduled by Therapist");
+}
+
+export async function notifyRescheduleByAdmin(
+    bookingId: number,
+    user: { id: number; email: string; name: string },
+    therapist: { user_id: number; email: string; name: string },
+    newDate: Date
+) {
+    const dateStr = newDate.toLocaleString();
+
+    const commonHtml = (name: string) => generateEmailHtml({
+        title: "Session Rescheduled by Admin",
+        body: `<p>Hi ${name},</p><p>An administrator has rescheduled session #${bookingId}.</p>`,
+        actionLabel: "View Schedule",
+        actionUrl: `${BASE_URL}/login`,
+        details: [
+            { label: "Booking ID", value: `#${bookingId}` },
+            { label: "New Date & Time", value: dateStr }
+        ]
+    });
+
+    await sendEmail({ to: user.email, subject: "Session Rescheduled", html: commonHtml(user.name) });
+    await sendEmail({ to: therapist.email, subject: "Session Rescheduled", html: commonHtml("Therapist") });
+
+    await logNotification(user.id, NOTIFICATION_TYPES.RESCHEDULED, 'booking', bookingId, 'success', "Rescheduled by Admin");
+}
 
 // 1. Therapist Applied
 export async function notifyTherapistApplication(therapistUser: { id: number; email: string; name: string }) {

@@ -37,7 +37,7 @@ export default function TherapistLayout({ children, hideMobileHeader = false }: 
                             <Image src="/better-talk-logo.png" alt="Logo" width={40} height={40} className="object-contain w-full h-full" />
                         </div>
                         <h1 className="text-xl font-bold text-gray-900 tracking-tight">
-                            Therapist<span className="text-blue-600">Portal</span>
+                            BetterTalk <span className="text-blue-600">Therapists</span>
                         </h1>
                     </div>
                 </div>
@@ -100,7 +100,7 @@ export default function TherapistLayout({ children, hideMobileHeader = false }: 
                             <div className="relative w-8 h-8">
                                 <Image src="/better-talk-logo.png" alt="Logo" width={32} height={32} className="object-contain w-full h-full" />
                             </div>
-                            <span className="font-bold text-gray-900">Therapist Portal</span>
+                            <span className="font-bold text-gray-900">BetterTalk <span className="text-blue-600">Therapists</span></span>
                         </div>
 
                         {/* Profile Dropdown */}

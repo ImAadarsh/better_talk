@@ -42,12 +42,12 @@ export default function TherapistDashboard() {
 
     return (
         <TherapistLayout>
-            <div className="max-w-6xl mx-auto">
-                <header className="mb-8">
-                    <h1 className="text-3xl font-bold text-gray-900">
+            <div className="w-full">
+                <header className="mb-6 md:mb-10">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">
                         Welcome back, {session?.user?.name}
                     </h1>
-                    <p className="text-gray-500">Here&apos;s what&apos;s happening today.</p>
+                    <p className="text-sm md:text-base text-gray-500 mt-1">Here&apos;s what&apos;s happening today.</p>
                 </header>
 
                 {loading ? (

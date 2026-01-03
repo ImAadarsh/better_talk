@@ -103,12 +103,10 @@ export default function SessionsPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
-                <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
-                    <div>
-                        <h1 className="text-3xl font-bold text-gray-900 mb-2">My Sessions</h1>
-                        <p className="text-gray-600">Manage your scheduled therapy sessions.</p>
-                    </div>
+            <div className="w-full px-4 py-8 pb-32">
+                <div className="mb-6 md:mb-10">
+                    <h1 className="text-2xl md:text-3xl font-bold text-gray-900">My Sessions</h1>
+                    <p className="text-sm md:text-base text-gray-600 mt-1">Manage your scheduled therapy sessions.</p>
                 </div>
 
                 {/* Tabs */}
@@ -200,7 +198,8 @@ export default function SessionsPage() {
                                                 href={session.joining_link}
                                                 target="_blank"
                                                 rel="noopener noreferrer"
-                                                className="w-full md:w-auto px-6 py-3 bg-brand-primary text-white font-medium rounded-xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20"
+                                                style={{ background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}
+                                                className="w-full md:w-auto px-6 py-3 text-white font-medium rounded-xl hover:opacity-90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-blue-500/20"
                                             >
                                                 <Video className="w-4 h-4" />
                                                 Join Meeting
