@@ -348,8 +348,8 @@ export default function LandingPage() {
             <section id="deep-dive-mentorship" className="py-24 px-6 text-white" style={{ background: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}>
                 <div className="max-w-7xl mx-auto flex flex-col md:flex-row-reverse items-center gap-16">
                     <motion.div
-                        initial={{ opacity: 0, x: 50 }}
-                        whileInView={{ opacity: 1, x: 0 }}
+                        initial={{ opacity: 0, y: 50 }}
+                        whileInView={{ opacity: 1, y: 0 }}
                         viewport={{ once: true }}
                         transition={{ duration: 0.8 }}
                         className="md:w-1/2"

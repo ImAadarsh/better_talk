@@ -10,7 +10,7 @@ export async function middleware(request: NextRequest) {
     // console.log(`[Middleware] Path: ${pathname}, Role: ${(token as any)?.role}, Email: ${token?.email}`);
 
     // Public paths that do not require auth
-    const publicPaths = ['/login', '/about', '/therapist', '/register', '/contact', '/stories', '/adx/login', '/faq', '/privacy-policy', '/policy', '/groups'];
+    const publicPaths = ['/login', '/about', '/therapist', '/register', '/contact', '/stories', '/adx/login', '/faq', '/privacy-policy', '/policy'];
 
     const rootRedirects = pathname === '/' || pathname === '/login' || pathname === '/register';
 
