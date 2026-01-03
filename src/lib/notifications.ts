@@ -130,11 +130,25 @@ export async function sendEmail({ to, subject, html }: EmailOptions) {
     }
 }
 
-export async function logNotification(userId: number, type: string, referenceType?: string, referenceId?: number, status: 'success' | 'failed' = 'success', errorMessage?: string) {
+export async function logNotification(
+    userId: number,
+    type: string,
+    referenceType?: string | null,
+    referenceId?: number | null,
+    status: 'success' | 'failed' = 'success',
+    errorMessage?: string | null
+) {
     try {
         await pool.execute(
             `INSERT INTO notification_logs (user_id, type, reference_type, reference_id, status, error_message) VALUES (?, ?, ?, ?, ?, ?)`,
-            [userId, type, referenceType, referenceId, status, errorMessage]
+            [
+                userId,
+                type,
+                referenceType || null,
+                referenceId || null,
+                status,
+                errorMessage || null
+            ]
         );
     } catch (error) {
         console.error("Error logging notification:", error);

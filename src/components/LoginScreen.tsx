@@ -7,7 +7,8 @@ import { signIn } from "next-auth/react";
 
 export default function LoginScreen() {
     const handleLogin = () => {
-        signIn("google");
+        // Redirect to root; middleware will detect auth token and redirect to correct dashboard
+        signIn("google", { callbackUrl: "/" });
     };
 
     return (

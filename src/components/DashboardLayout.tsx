@@ -103,7 +103,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                         <div className="flex-1 min-w-0">
                             <p className="text-sm font-medium text-gray-900 truncate">{session?.user?.name}</p>
                             <button
-                                onClick={() => signOut()}
+                                onClick={() => signOut({ callbackUrl: '/' })}
                                 className="text-xs text-red-500 hover:underline flex items-center gap-1"
                             >
                                 <LogOut className="w-3 h-3" /> Sign out
@@ -169,7 +169,7 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                         </Link>
                                         <div className="h-px bg-gray-100 my-1" />
                                         <button
-                                            onClick={() => signOut()}
+                                            onClick={() => signOut({ callbackUrl: '/' })}
                                             className="px-4 py-3 hover:bg-red-50 flex items-center gap-3 text-red-500 font-medium w-full text-left"
                                         >
                                             <LogOut className="w-5 h-5" /> Logout

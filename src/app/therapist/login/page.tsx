@@ -20,7 +20,7 @@ export default function TherapistLoginPage() {
     }, [session, router]);
 
     const handleGoogleLogin = () => {
-        signIn("google", { callbackUrl: "/therapist/dashboard" });
+        signIn("google", { callbackUrl: "/" });
     };
 
     return (

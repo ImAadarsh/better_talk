@@ -7,7 +7,7 @@ import { signIn } from "next-auth/react";
 
 export default function RegisterPage() {
     const handleLogin = () => {
-        signIn("google", { callbackUrl: "/onboarding" });
+        signIn("google", { callbackUrl: "/sessions" });
     };
 
     return (

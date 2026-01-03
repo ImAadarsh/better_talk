@@ -11,6 +11,30 @@ export const authOptions: NextAuthOptions = {
     ],
     secret: process.env.NEXTAUTH_SECRET,
     callbacks: {
+        async signIn({ user, account, profile }) {
+            try {
+                // Check if user exists
+                const [rows] = await pool.execute(
+                    "SELECT id FROM users WHERE email = ?",
+                    [user.email]
+                ) as any[];
+
+                if (rows.length > 0) {
+                    // User exists - allow sign in (will go to callbackUrl which is /sessions typically)
+                    return true;
+                } else {
+                    // New User - Create placeholder and redirect to onboarding
+                    await pool.execute(
+                        "INSERT INTO users (email, name, image, google_id, role, is_active) VALUES (?, ?, ?, ?, 'user', 1)",
+                        [user.email, user.name || 'New User', user.image, user.id] // user.id from next-auth is the sub/google_id
+                    );
+                    return "/onboarding";
+                }
+            } catch (error) {
+                console.error("SignIn callback error:", error);
+                return true; // Fallback
+            }
+        },
         async jwt({ token, user, account, profile }) {
             if (user) {
                 try {
