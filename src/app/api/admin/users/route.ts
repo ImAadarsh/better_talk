@@ -13,7 +13,7 @@ export async function GET() {
         }
 
         const [rows] = await pool.execute(
-            "SELECT id, name, email, role, is_active as status, created_at as joined FROM users ORDER BY created_at DESC"
+            "SELECT id, name, email, role, image, avatar_url, is_active as status, created_at as joined FROM users WHERE role IN ('user', 'admin') ORDER BY created_at DESC"
         ) as any[];
 
         const formattedRows = rows.map((u: any) => ({

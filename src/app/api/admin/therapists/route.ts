@@ -15,12 +15,16 @@ export async function GET() {
         const [rows] = await pool.execute(`
             SELECT 
                 m.id, 
+                u.id as user_id,
                 u.name, 
                 u.email, 
                 m.designation, 
                 m.experience_years as experience, 
                 m.patients_treated as patients, 
                 m.is_verified, 
+                u.is_active as status,
+                u.image,
+                u.avatar_url,
                 m.created_at as applied 
             FROM mentors m
             JOIN users u ON m.user_id = u.id

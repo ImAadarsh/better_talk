@@ -123,10 +123,10 @@ CREATE TABLE group_posts (
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 ```
 
-### 3.4 `group_comments`
+### 3.4 `group_post_comments`
 
 ```sql
-CREATE TABLE group_comments (
+CREATE TABLE group_post_comments (
   id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   post_id               BIGINT UNSIGNED NOT NULL,
   user_id               BIGINT UNSIGNED NOT NULL,
@@ -135,12 +135,12 @@ CREATE TABLE group_comments (
   created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  INDEX idx_group_comments_post_id (post_id),
-  INDEX idx_group_comments_user_id (user_id),
-  CONSTRAINT fk_group_comments_post
+  INDEX idx_group_post_comments_post_id (post_id),
+  INDEX idx_group_post_comments_user_id (user_id),
+  CONSTRAINT fk_group_post_comments_post
     FOREIGN KEY (post_id) REFERENCES group_posts(id)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT fk_group_comments_user
+  CONSTRAINT fk_group_post_comments_user
     FOREIGN KEY (user_id) REFERENCES users(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

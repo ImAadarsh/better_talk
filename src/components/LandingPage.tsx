@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import Image from "next/image";
 import { ArrowRight, Heart, Shield, Users, Star, Play, CheckCircle, ChevronDown } from "lucide-react";
 import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
@@ -9,8 +10,16 @@ import Footer from "@/components/Footer";
 
 export default function LandingPage() {
     const welcomeRef = useRef<HTMLElement>(null);
-    const [randomUsers, setRandomUsers] = useState<any[]>([]);
 
+    // Hardcoded random users for social proof (restored)
+    const randomUsers = [
+        { id: 1, avatar_url: "https://images.unsplash.com/photo-1534528741775-53994a69daeb?auto=format&fit=crop&q=80&w=64&h=64" },
+        { id: 2, avatar_url: "https://images.unsplash.com/photo-1506794778202-cad84cf45f1d?auto=format&fit=crop&q=80&w=64&h=64" },
+        { id: 3, avatar_url: "https://images.unsplash.com/photo-1494790108377-be9c29b29330?auto=format&fit=crop&q=80&w=64&h=64" },
+        { id: 4, avatar_url: "https://images.unsplash.com/photo-1527980965255-d3b416303d12?auto=format&fit=crop&q=80&w=64&h=64" },
+        { id: 5, avatar_url: "https://images.unsplash.com/photo-1544005313-94ddf0286df2?auto=format&fit=crop&q=80&w=64&h=64" },
+        { id: 6, avatar_url: "https://images.unsplash.com/photo-1517841905240-472988babdf9?auto=format&fit=crop&q=80&w=64&h=64" },
+    ];
 
     useEffect(() => {
         if (typeof window !== "undefined" && "paintWorklet" in CSS) {
@@ -47,20 +56,6 @@ export default function LandingPage() {
             section.addEventListener("pointerleave", handlePointerLeave);
         }
 
-        // Fetch random users for social proof
-        const fetchRandomUsers = async () => {
-            try {
-                const res = await fetch("/api/public/random-users");
-                const data = await res.json();
-                if (data && Array.isArray(data) && data.length > 0) {
-                    setRandomUsers(data);
-                }
-            } catch (err) {
-                console.error("Error fetching random users:", err);
-            }
-        };
-        fetchRandomUsers();
-
         return () => {
 
             if (section) {
@@ -70,12 +65,31 @@ export default function LandingPage() {
         };
     }, []);
 
+    // Fetch Dynamic FAQs
+    const [faqs, setFaqs] = useState<any[]>([]);
+
+    useEffect(() => {
+        const fetchFaqs = async () => {
+            try {
+                const res = await fetch("/api/public/faqs?limit=5");
+                const data = await res.json();
+                setFaqs(data);
+            } catch (error) {
+                console.error("Error fetching FAQs:", error);
+            }
+        };
+        fetchFaqs();
+    }, []);
+
+    // FAQ Section
+    const [activeAccordion, setActiveAccordion] = useState<number | null>(null);
+
     return (
-        <div className="min-h-screen bg-white text-gray-900 font-sans selection:bg-brand-primary/20">
+        <div className="min-h-screen bg-white font-sans selection:bg-teal-500/20">
             <PublicNavbar />
 
             {/* Hero Section */}
-            <section id="welcome" ref={welcomeRef} className="relative pt-32 pb-20 md:pt-48 md:pb-32 overflow-hidden">
+            <main id="welcome" ref={welcomeRef} className="relative pt-32 pb-20 lg:pt-48 lg:pb-32 overflow-hidden">
                 {/* Background Gradients */}
                 <motion.div
                     initial={{ opacity: 0 }}
@@ -187,26 +201,18 @@ export default function LandingPage() {
                     >
                         <div className="flex items-center gap-2">
                             <div className="flex -space-x-3">
-                                {randomUsers.length > 0 ? (
-                                    randomUsers.map(user => (
-                                        <div key={user.id} className="w-9 h-9 rounded-full border-2 border-white overflow-hidden bg-gray-100 flex-shrink-0">
-                                            <img
-                                                src={user.avatar_url}
-                                                alt="Member"
-                                                className="w-full h-full object-cover"
-                                                onError={(e) => {
-                                                    (e.target as any).src = "https://ui-avatars.com/api/?name=User&background=random";
-                                                }}
-                                            />
-                                        </div>
-                                    ))
-                                ) : (
-                                    [1, 2, 3, 4, 5].map(i => (
-                                        <div key={i} className="w-9 h-9 rounded-full bg-gray-100 border-2 border-white flex items-center justify-center overflow-hidden">
-                                            <img src={`https://ui-avatars.com/api/?name=${i}&background=random&color=fff`} alt="U" className="w-full h-full" />
-                                        </div>
-                                    ))
-                                )}
+                                {randomUsers.slice(0, 4).map(user => (
+                                    <div key={user.id} className="w-9 h-9 rounded-full border-2 border-white overflow-hidden bg-gray-100 flex-shrink-0">
+                                        <Image
+                                            src={user.avatar_url}
+                                            alt="Member"
+                                            width={36}
+                                            height={36}
+                                            className="w-full h-full object-cover"
+                                            unoptimized={true}
+                                        />
+                                    </div>
+                                ))}
                             </div>
 
                             <div className="text-left">
@@ -227,7 +233,7 @@ export default function LandingPage() {
                         </div>
                     </motion.div>
                 </div>
-            </section>
+            </main>
 
             {/* Features Grid */}
             <section className="py-20 bg-[#2F3E35] text-white">
@@ -313,7 +319,7 @@ export default function LandingPage() {
                         transition={{ duration: 0.8 }}
                         className="md:w-1/2"
                     >
-                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 text-white rounded-full text-xs font-bold mb-6 uppercase tracking-wider border border-white/20">Expert Guidance</div>
+                        <div className="inline-flex items-center gap-2 px-3 py-1 bg-white/10 text-white rounded-full text-xs font-bold mb-6 uppercase tracking-wider">Expert Guidance</div>
                         <h2 className="text-4xl font-bold mb-6 text-white">1-on-1 Mentorship.</h2>
                         <p className="text-lg text-gray-200 mb-8 leading-relaxed">
                             Book private sessions with verified therapists and mentors. Choose plans that fit your schedule and budget, and communicate through secure, time-bound chat sessions.
@@ -430,10 +436,19 @@ export default function LandingPage() {
                 <div className="max-w-3xl mx-auto">
                     <h2 className="text-3xl font-bold text-center text-gray-900 mb-12">Frequently Asked Questions</h2>
                     <div className="space-y-4">
-                        <FaqItem q="Is BetterTalk really anonymous?" a="Yes! You choose an anonymous username during onboarding, and your personal details like email and phone are never shared publicly." />
-                        <FaqItem q="How do I become a verified Therapist?" a="You can apply through our therapist portal. We review certifications and experience before granting the verified badge." />
-                        <FaqItem q="Is the platform free to use?" a="Joining groups and community discussions is completely free. 1-on-1 mentorship sessions are paid bookings." />
-                        <FaqItem q="Can I delete my account?" a="Yes, you can request account deletion at any time from your profile settings." />
+                        {faqs.length > 0 ? (
+                            faqs.map(faq => (
+                                <FaqItem key={faq.id} q={faq.question} a={faq.answer} />
+                            ))
+                        ) : (
+                            <>
+                                <FaqItem q="Is BetterTalk really anonymous?" a="Yes! You choose an anonymous username during onboarding, and your personal details like email and phone are never shared publicly." />
+                                <FaqItem q="How do I become a verified Therapist?" a="You can apply through our therapist portal. We review certifications and experience before granting the verified badge." />
+                            </>
+                        )}
+                        <div className="mt-8 text-center">
+                            <Link href="/faq" className="text-blue-600 font-bold hover:underline">View all FAQs</Link>
+                        </div>
                     </div>
                 </div>
             </section>

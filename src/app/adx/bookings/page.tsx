@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useEffect } from "react";
+import Image from "next/image";
 import DataTable from "@/components/admin/DataTable";
 import { Calendar, User, Stethoscope, IndianRupee, Clock, ArrowRight, MoreHorizontal } from "lucide-react";
 import ScientificLoader from "@/components/ScientificLoader";
@@ -35,23 +36,44 @@ export default function BookingsPage() {
         },
         {
             key: "user",
-            label: "Patient / User",
-            render: (val: string) => (
+            label: "Patient",
+            render: (val: string, row: any) => (
                 <div className="flex items-center gap-2">
-                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold text-xs">
-                        {val.charAt(0)}
+                    <div className="w-8 h-8 rounded-full bg-gray-100 flex items-center justify-center text-gray-500 font-bold overflow-hidden border border-gray-100/50 shadow-sm shrink-0">
+                        {row.user_image || row.user_avatar ? (
+                            <Image
+                                src={row.user_image || row.user_avatar}
+                                alt={val}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                                unoptimized={!(row.user_image?.startsWith('http') || row.user_avatar?.startsWith('http'))}
+                            />
+                        ) : (
+                            val.charAt(0)
+                        )}
                     </div>
-                    <span className="font-bold text-gray-900">{val}</span>
+                    <span className="font-bold text-gray-700">{val}</span>
                 </div>
             )
         },
         {
             key: "therapist",
             label: "Therapist",
-            render: (val: string) => (
+            render: (val: string, row: any) => (
                 <div className="flex items-center gap-2">
-                    <div className="p-1.5 bg-blue-50 rounded-lg text-blue-600">
-                        <Stethoscope className="w-3.5 h-3.5" />
+                    <div className="w-8 h-8 rounded-xl bg-blue-50 flex items-center justify-center text-blue-600 overflow-hidden border border-blue-100/50 shadow-sm shrink-0">
+                        {row.therapist_image || row.therapist_avatar ? (
+                            <Image
+                                src={row.therapist_image || row.therapist_avatar}
+                                alt={val}
+                                width={32}
+                                height={32}
+                                className="w-full h-full object-cover"
+                            />
+                        ) : (
+                            <Stethoscope className="w-4 h-4" />
+                        )}
                     </div>
                     <span className="font-bold text-gray-700">{val}</span>
                 </div>
@@ -122,6 +144,17 @@ export default function BookingsPage() {
                 columns={columns}
                 data={bookings}
                 actions={actions}
+                filters={[
+                    {
+                        key: "status",
+                        label: "Booking Status",
+                        options: [
+                            { value: "confirmed", label: "Confirmed" },
+                            { value: "pending", label: "Pending" },
+                            { value: "cancelled", label: "Cancelled" }
+                        ]
+                    }
+                ]}
             />
         </div>
     );

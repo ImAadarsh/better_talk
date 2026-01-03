@@ -21,10 +21,10 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        const { slots } = await req.json();
+        const { slots, plan_id } = await req.json();
 
-        if (!slots || !Array.isArray(slots) || slots.length === 0) {
-            return NextResponse.json({ error: "No slots provided" }, { status: 400 });
+        if (!slots || !Array.isArray(slots) || slots.length === 0 || !plan_id) {
+            return NextResponse.json({ error: "Missing slots or plan_id" }, { status: 400 });
         }
 
         const mentorId = await getMentorId(session.user.email);
@@ -32,15 +32,40 @@ export async function POST(req: Request) {
             return NextResponse.json({ error: "Mentor profile not found" }, { status: 404 });
         }
 
-        // Simple loop approach
+        // Simple loop approach with overlap check
+        const conflicts = [];
         for (const slot of slots) {
+            const startStr = new Date(slot.start).toISOString().slice(0, 19).replace('T', ' ');
+            const endStr = new Date(slot.end).toISOString().slice(0, 19).replace('T', ' ');
+
+            // Check overlap
+            const [overlapRows] = await pool.execute(
+                `SELECT id FROM mentor_slots 
+                 WHERE mentor_id = ? 
+                 AND (start_time < ? AND end_time > ?)`,
+                [mentorId, endStr, startStr]
+            ) as any[];
+
+            if (overlapRows.length > 0) {
+                conflicts.push(slot);
+                continue;
+            }
+
             await pool.execute(
-                "INSERT INTO mentor_slots (mentor_id, start_time, end_time, is_booked) VALUES (?, ?, ?, 0)",
-                [mentorId, new Date(slot.start), new Date(slot.end)]
+                "INSERT INTO mentor_slots (mentor_id, mentor_plans_id, start_time, end_time, is_booked) VALUES (?, ?, ?, ?, 0)",
+                [mentorId, plan_id, startStr, endStr]
             );
         }
 
-        return NextResponse.json({ success: true, count: slots.length });
+        if (conflicts.length > 0 && conflicts.length === slots.length) {
+            return NextResponse.json({ error: "All slots conflict with existing ones", conflicts }, { status: 409 });
+        }
+
+        return NextResponse.json({
+            success: true,
+            count: slots.length - conflicts.length,
+            conflicts: conflicts.length
+        });
 
     } catch (error) {
         console.error("Create slots error:", error);

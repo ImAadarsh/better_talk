@@ -2,7 +2,7 @@
 
 import { useEffect, useState, useRef } from "react";
 import TherapistLayout from "@/components/TherapistLayout";
-import { Loader2, User, Edit2, BadgeCheck, Stethoscope, Phone, Globe, Award, BookOpen, Clock, Camera } from "lucide-react";
+import { Loader2, User, Edit2, BadgeCheck, Stethoscope, Phone, Globe, Award, BookOpen, Clock, Camera, Activity } from "lucide-react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import ScientificLoader from "@/components/ScientificLoader";
@@ -235,6 +235,10 @@ export default function TherapistProfilePage() {
                                 <span className="flex items-center gap-1">
                                     <Globe className="w-4 h-4 text-green-500" />
                                     <span>{profile.languages || "Language not set"}</span>
+                                </span>
+                                <span className="flex items-center gap-1">
+                                    <Activity className="w-4 h-4 text-purple-500" />
+                                    <span>Plan-based Pricing</span>
                                 </span>
                             </div>
 

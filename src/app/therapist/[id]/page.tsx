@@ -8,6 +8,13 @@ import { useParams, useRouter } from "next/navigation";
 import ScientificLoader from "@/components/ScientificLoader";
 import { format, addDays, isSameDay, parseISO } from "date-fns";
 
+interface Plan {
+    id: number;
+    price_in_inr: number;
+    session_duration_min: string;
+    chat_window_days: number;
+}
+
 interface Therapist {
     id: number;
     name: string;
@@ -22,6 +29,8 @@ interface Slot {
     id: number;
     start_time: string;
     end_time: string;
+    price_in_inr: number;
+    session_duration_min: string;
 }
 
 export default function TherapistProfilePage() {
@@ -29,6 +38,7 @@ export default function TherapistProfilePage() {
     const router = useRouter();
     const [therapist, setTherapist] = useState<Therapist | null>(null);
     const [slots, setSlots] = useState<Slot[]>([]);
+    const [plans, setPlans] = useState<Plan[]>([]);
     const [loading, setLoading] = useState(true);
     const [selectedDate, setSelectedDate] = useState<Date>(new Date());
     const [selectedSlot, setSelectedSlot] = useState<Slot | null>(null);
@@ -43,6 +53,7 @@ export default function TherapistProfilePage() {
                     const json = await res.json();
                     setTherapist(json.mentor);
                     setSlots(json.slots);
+                    setPlans(json.plans || []);
                 } else {
                     router.push("/therapists");
                 }
@@ -228,12 +239,37 @@ export default function TherapistProfilePage() {
                                     </div>
                                     <span>One-on-One Session</span>
                                 </li>
-                                <li className="flex items-center gap-3">
-                                    <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
-                                        <Clock className="w-4 h-4" />
-                                    </div>
-                                    <span>60 Minutes Duration</span>
-                                </li>
+                                {selectedSlot ? (
+                                    <>
+                                        <li className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                                <Clock className="w-4 h-4" />
+                                            </div>
+                                            <span>{selectedSlot.session_duration_min} Minutes Duration</span>
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                                <Activity className="w-4 h-4" />
+                                            </div>
+                                            <span>{selectedSlot.price_in_inr} INR / Session</span>
+                                        </li>
+                                    </>
+                                ) : (
+                                    <>
+                                        <li className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-purple-50 flex items-center justify-center text-purple-600">
+                                                <Clock className="w-4 h-4" />
+                                            </div>
+                                            <span>{plans.length > 0 ? plans.map(p => p.session_duration_min).join('/') : '60'} Minutes</span>
+                                        </li>
+                                        <li className="flex items-center gap-3">
+                                            <div className="w-8 h-8 rounded-full bg-amber-50 flex items-center justify-center text-amber-600">
+                                                <Activity className="w-4 h-4" />
+                                            </div>
+                                            <span>Starts from INR {plans.length > 0 ? Math.min(...plans.map(p => p.price_in_inr)) : '0'}</span>
+                                        </li>
+                                    </>
+                                )}
                                 <li className="flex items-center gap-3">
                                     <div className="w-8 h-8 rounded-full bg-green-50 flex items-center justify-center text-green-600">
                                         <ShieldCheck className="w-4 h-4" />
@@ -267,6 +303,10 @@ export default function TherapistProfilePage() {
                                     <span className="font-medium text-gray-900">
                                         {format(parseISO(selectedSlot.start_time), "h:mm a")} - {format(parseISO(selectedSlot.end_time), "h:mm a")}
                                     </span>
+                                </div>
+                                <div className="flex items-center gap-3 mt-2 pt-2 border-t border-brand-primary/10">
+                                    <Activity className="w-5 h-5 text-brand-primary" />
+                                    <span className="font-bold text-gray-900">Price: ₹{selectedSlot.price_in_inr}</span>
                                 </div>
                             </div>
 

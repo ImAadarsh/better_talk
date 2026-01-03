@@ -41,6 +41,8 @@ export default function TherapistSchedulePage() {
     // Dates with slots
     const [datesWithSlots, setDatesWithSlots] = useState<string[]>([]);
     const [selectedDateFromDropdown, setSelectedDateFromDropdown] = useState("");
+    const [plans, setPlans] = useState<any[]>([]);
+    const [selectedPlanId, setSelectedPlanId] = useState<string>("");
 
     // Callback definitions
     const fetchDatesWithSlots = useCallback(async () => {
@@ -73,10 +75,18 @@ export default function TherapistSchedulePage() {
         }
     }, [date]);
 
-    // Fetch dates with slots on mount
+    // Fetch dates with slots & plans on mount
     useEffect(() => {
         if (status === "authenticated") {
             fetchDatesWithSlots();
+            // Fetch plans
+            fetch("/api/therapist/plans").then(res => res.json()).then(data => {
+                setPlans(data || []);
+                if (data.length > 0) {
+                    setSelectedPlanId(data[0].id.toString());
+                    setDuration(parseInt(data[0].session_duration_min));
+                }
+            }).catch(console.error);
         }
     }, [status, fetchDatesWithSlots]);
 
@@ -116,16 +126,27 @@ export default function TherapistSchedulePage() {
             const res = await fetch("/api/therapist/slots", {
                 method: "POST",
                 headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ slots: selected }),
+                body: JSON.stringify({
+                    slots: selected,
+                    plan_id: selectedPlanId
+                }),
             });
 
             if (res.ok) {
-                alert("Slots saved successfully!");
+                const data = await res.json();
+                if (data.conflicts > 0) {
+                    alert(`${data.conflicts} slots were skipped because they overlap with your existing schedule.`);
+                } else {
+                    alert("Slots saved successfully!");
+                }
                 setGeneratedSlots([]); // Clear generated
                 fetchExistingSlots(); // Refresh list
                 fetchDatesWithSlots(); // Refresh dropdown
+            } else if (res.status === 409) {
+                alert("Failed to save: All selected slots overlap with your existing schedule.");
             } else {
-                alert("Failed to save slots.");
+                const err = await res.json();
+                alert(`Failed to save slots: ${err.error || "Unknown error"}`);
             }
         } catch (error) {
             console.error(error);
@@ -236,18 +257,31 @@ export default function TherapistSchedulePage() {
                                     </div>
                                 </div>
 
-                                <div>
-                                    <label className="text-sm font-medium text-gray-700 block mb-1">Duration (Minutes)</label>
-                                    <select
-                                        value={duration}
-                                        onChange={(e) => setDuration(Number(e.target.value))}
-                                        className="w-full px-4 py-2 bg-gray-50 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 outline-none"
-                                    >
-                                        <option value="30">30 Minutes</option>
-                                        <option value="45">45 Minutes</option>
-                                        <option value="60">60 Minutes</option>
-                                        <option value="90">90 Minutes</option>
-                                    </select>
+                                <div className="space-y-4">
+                                    <label className="text-sm font-medium text-gray-700 block mb-1">Session Plan</label>
+                                    <div className="relative">
+                                        <select
+                                            value={selectedPlanId}
+                                            onChange={(e) => {
+                                                const planId = e.target.value;
+                                                setSelectedPlanId(planId);
+                                                const plan = plans.find(p => p.id.toString() === planId);
+                                                if (plan) setDuration(parseInt(plan.session_duration_min));
+                                            }}
+                                            className="w-full appearance-none pl-4 pr-10 py-3 bg-gray-50 rounded-xl border border-gray-200 focus:ring-2 focus:ring-blue-500/20 outline-none text-sm font-bold"
+                                        >
+                                            {plans.map(p => (
+                                                <option key={p.id} value={p.id}>INR {p.price_in_inr} - {p.session_duration_min}m</option>
+                                            ))}
+                                            {plans.length === 0 && <option value="">No active plans found</option>}
+                                        </select>
+                                        <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-gray-400 pointer-events-none" />
+                                    </div>
+                                    {plans.length === 0 && (
+                                        <p className="text-[10px] text-amber-600 font-bold px-1">
+                                            * Contact admin to create a session plan first.
+                                        </p>
+                                    )}
                                 </div>
 
                                 <button

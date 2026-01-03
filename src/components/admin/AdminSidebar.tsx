@@ -11,7 +11,12 @@ import {
     Settings,
     LogOut,
     Menu,
-    X
+    X,
+    FolderTree,
+    Clock,
+    Globe,
+    Shield,
+    HelpCircle
 } from "lucide-react";
 import Image from "next/image";
 
@@ -22,8 +27,14 @@ const menuItems = [
     { name: "Dashboard", href: "/adx", icon: LayoutDashboard },
     { name: "Users", href: "/adx/users", icon: Users },
     { name: "Therapists", href: "/adx/therapists", icon: Stethoscope },
+    { name: "Plan Management", href: "/adx/plans", icon: FolderTree },
+    { name: "Slot Management", href: "/adx/slots", icon: Clock },
     { name: "Bookings", href: "/adx/bookings", icon: CalendarCheck },
-    { name: "Messages", href: "/adx/messages", icon: MessageSquare },
+    { name: "Communities", href: "/adx/groups", icon: Globe },
+    { name: "Moderation", href: "/adx/moderation", icon: Shield },
+    { name: "Stories", href: "/adx/stories", icon: Settings }, // Using Settings temporarily or import another icon
+    { name: "FAQs", href: "/adx/faqs", icon: HelpCircle },
+    { name: "Contact Inquiries", href: "/adx/messages", icon: MessageSquare },
 ];
 
 export default function AdminSidebar() {
@@ -92,13 +103,7 @@ export default function AdminSidebar() {
 
                     {/* Footer */}
                     <div className="pt-6 border-t border-gray-100">
-                        <Link
-                            href="/adx/settings"
-                            className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-gray-500 hover:bg-gray-50 hover:text-gray-900 transition-all mb-1"
-                        >
-                            <Settings className="w-5 h-5 text-gray-400" />
-                            Settings
-                        </Link>
+
                         <button
                             onClick={() => signOut({ callbackUrl: "/" })}
                             className="flex items-center gap-3 px-4 py-3.5 rounded-xl text-sm font-semibold text-red-500 hover:bg-red-50 transition-all w-full mb-4"
@@ -108,9 +113,8 @@ export default function AdminSidebar() {
                         </button>
 
                         <div className="px-4 py-2 text-[10px] font-bold text-gray-300 uppercase tracking-widest text-center">
-                            © 2026 <br />
                             Developed By <br />
-                            <span className="text-gray-400">Endeavour Digital</span>
+                            <span className="text-gray-400"><a href="https://endeavourdigital.in" target="_blank">Endeavour Digital</a></span>
                         </div>
                     </div>
                 </div>

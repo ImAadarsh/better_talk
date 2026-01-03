@@ -99,8 +99,8 @@ CREATE TABLE group_posts (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 3.4 group_comments
-CREATE TABLE group_comments (
+-- 3.4 group_post_comments
+CREATE TABLE group_post_comments (
   id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   post_id               BIGINT UNSIGNED NOT NULL,
   user_id               BIGINT UNSIGNED NOT NULL,
@@ -109,12 +109,12 @@ CREATE TABLE group_comments (
   created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
-  INDEX idx_group_comments_post_id (post_id),
-  INDEX idx_group_comments_user_id (user_id),
-  CONSTRAINT fk_group_comments_post
+  INDEX idx_group_post_comments_post_id (post_id),
+  INDEX idx_group_post_comments_user_id (user_id),
+  CONSTRAINT fk_group_post_comments_post
     FOREIGN KEY (post_id) REFERENCES group_posts(id)
     ON DELETE CASCADE ON UPDATE CASCADE,
-  CONSTRAINT fk_group_comments_user
+  CONSTRAINT fk_group_post_comments_user
     FOREIGN KEY (user_id) REFERENCES users(id)
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
@@ -125,11 +125,9 @@ CREATE TABLE group_comments (
 CREATE TABLE mentor_plans (
   id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   mentor_id             BIGINT UNSIGNED NOT NULL,
-  title                 VARCHAR(191) NOT NULL,
-  description           TEXT,
   price_in_inr          INT NOT NULL,
-  session_duration_min  INT DEFAULT NULL, -- optional
-  chat_window_days      INT NOT NULL,     -- e.g. 3/5/7
+  session_duration_min  ENUM('30','45','60','90') NOT NULL DEFAULT '60',
+  chat_window_days      INT NOT NULL DEFAULT 0,
   is_active             TINYINT(1) NOT NULL DEFAULT 1,
   created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
@@ -140,23 +138,49 @@ CREATE TABLE mentor_plans (
     ON DELETE CASCADE ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
--- 4.2 bookings
+-- 4.2 mentor_slots
+CREATE TABLE mentor_slots (
+  id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  mentor_id             BIGINT UNSIGNED NOT NULL,
+  client_id             BIGINT UNSIGNED DEFAULT NULL,
+  mentor_plans_id       BIGINT UNSIGNED NOT NULL,
+  start_time            DATETIME NOT NULL,
+  end_time              DATETIME NOT NULL,
+  is_booked             TINYINT(1) NOT NULL DEFAULT 0,
+  created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
+
+  INDEX idx_mentor_slots_mentor_id (mentor_id),
+  INDEX idx_mentor_slots_client_id (client_id),
+  INDEX idx_mentor_slots_plan_id (mentor_plans_id),
+  CONSTRAINT fk_mentor_slots_mentor
+    FOREIGN KEY (mentor_id) REFERENCES mentors(id)
+    ON DELETE CASCADE ON UPDATE CASCADE,
+  CONSTRAINT fk_mentor_slots_client
+    FOREIGN KEY (client_id) REFERENCES users(id)
+    ON DELETE SET NULL ON UPDATE CASCADE,
+  CONSTRAINT fk_mentor_slots_plan
+    FOREIGN KEY (mentor_plans_id) REFERENCES mentor_plans(id)
+    ON DELETE CASCADE ON UPDATE CASCADE
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
+
+-- 4.3 bookings
 CREATE TABLE bookings (
   id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
   user_id               BIGINT UNSIGNED NOT NULL,
   mentor_id             BIGINT UNSIGNED NOT NULL,
   mentor_plan_id        BIGINT UNSIGNED NOT NULL,
+  mentor_slot_id        BIGINT UNSIGNED DEFAULT NULL,
   status                ENUM('pending','confirmed','cancelled','expired') NOT NULL DEFAULT 'pending',
   payment_reference     VARCHAR(191) DEFAULT NULL,
   amount_paid_in_inr    INT NOT NULL,
-  session_start_at      DATETIME DEFAULT NULL,
-  session_end_at        DATETIME DEFAULT NULL,
   created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
   updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP,
 
   INDEX idx_bookings_user_id (user_id),
   INDEX idx_bookings_mentor_id (mentor_id),
   INDEX idx_bookings_plan_id (mentor_plan_id),
+  INDEX idx_bookings_slot_id (mentor_slot_id),
   INDEX idx_bookings_status (status),
   CONSTRAINT fk_bookings_user
     FOREIGN KEY (user_id) REFERENCES users(id)
@@ -166,7 +190,10 @@ CREATE TABLE bookings (
     ON DELETE CASCADE ON UPDATE CASCADE,
   CONSTRAINT fk_bookings_plan
     FOREIGN KEY (mentor_plan_id) REFERENCES mentor_plans(id)
-    ON DELETE RESTRICT ON UPDATE CASCADE
+    ON DELETE RESTRICT ON UPDATE CASCADE,
+  CONSTRAINT fk_bookings_slot
+    FOREIGN KEY (mentor_slot_id) REFERENCES mentor_slots(id)
+    ON DELETE SET NULL ON UPDATE CASCADE
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
 -- 4.3 chats
@@ -268,3 +295,16 @@ CREATE TABLE contact_messages (
   created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;
 
+
+-- 8. Success Stories
+CREATE TABLE stories (
+  id                    BIGINT UNSIGNED AUTO_INCREMENT PRIMARY KEY,
+  author_name           VARCHAR(191) NOT NULL,
+  author_role           VARCHAR(100) DEFAULT 'User',
+  title                 VARCHAR(191) DEFAULT NULL,
+  content               TEXT NOT NULL,
+  rating                INT DEFAULT 5,
+  is_active             TINYINT(1) NOT NULL DEFAULT 1,
+  created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,
+  updated_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP ON UPDATE CURRENT_TIMESTAMP
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_unicode_ci;

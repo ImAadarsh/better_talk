@@ -33,18 +33,26 @@ export async function GET(
 
         // 2. Fetch Available Slots (Future only, Unbooked)
         const [slotRows] = await pool.execute(
-            `SELECT id, start_time, end_time 
-             FROM mentor_slots 
-             WHERE mentor_id = ? 
-             AND client_id IS NULL 
-             AND start_time > NOW() 
-             ORDER BY start_time ASC`,
+            `SELECT s.id, s.start_time, s.end_time, p.price_in_inr, p.session_duration_min 
+             FROM mentor_slots s
+             JOIN mentor_plans p ON s.mentor_plans_id = p.id
+             WHERE s.mentor_id = ? 
+             AND s.client_id IS NULL 
+             AND s.start_time > NOW() 
+             ORDER BY s.start_time ASC`,
+            [mentorId]
+        );
+
+        // 3. Fetch Active Plans
+        const [planRows] = await pool.execute(
+            "SELECT * FROM mentor_plans WHERE mentor_id = ? AND is_active = 1",
             [mentorId]
         );
 
         return NextResponse.json({
             mentor,
-            slots: slotRows
+            slots: slotRows,
+            plans: planRows
         });
 
     } catch (error) {
