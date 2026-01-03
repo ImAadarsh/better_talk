@@ -27,9 +27,18 @@ export default function TherapistDetailsPage() {
                 const bookingsRes = await fetch(`/api/admin/bookings?mentor_id=${id}`);
                 const bData = await bookingsRes.json();
 
+                // Transform bookings to match columns
+                const formattedBookings = Array.isArray(bData) ? bData.map((b: any) => ({
+                    ...b,
+                    user: b.user_name || "Unknown",
+                    date: b.start_time ? new Date(b.start_time).toLocaleDateString() : "TBD",
+                    time: b.start_time ? new Date(b.start_time).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }) : "-",
+                    amount: b.price || 0
+                })) : [];
+
                 setData({
                     ...result,
-                    bookings: Array.isArray(bData) ? bData : []
+                    bookings: formattedBookings
                 });
             } catch (error) {
                 console.error("Error fetching therapist details:", error);

@@ -14,6 +14,10 @@ export default function Footer() {
                 </div>
 
                 <div className="text-gray-400 text-sm text-center md:text-right">
+                    <div className="flex flex-wrap justify-center md:justify-end gap-x-6 gap-y-2 mb-2">
+                        <Link href="/privacy-policy" className="hover:text-white transition-colors">Privacy Policy</Link>
+                        <Link href="/policy" className="hover:text-white transition-colors">Cancellation & Refund Policy</Link>
+                    </div>
                     <p>&copy; 2026 Better Talk. All rights reserved.</p>
                     <p className="mt-1">
                         Designed & Developed By <a href="https://endeavourdigital.in" target="_blank" rel="noopener noreferrer" className="text-brand-primary hover:text-white transition-colors font-medium">Endeavour Digital</a>
