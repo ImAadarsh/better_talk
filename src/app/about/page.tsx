@@ -6,6 +6,7 @@ import Link from "next/link";
 import { motion } from "framer-motion";
 import PublicNavbar from "@/components/PublicNavbar";
 import Footer from "@/components/Footer";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 export default function AboutPage() {
     return (
@@ -36,7 +37,7 @@ export default function AboutPage() {
                         className="text-5xl md:text-7xl font-extrabold tracking-tight text-gray-900 mb-6 leading-tight"
                     >
                         We&apos;re building a world where <br />
-                        <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-violet-600">no one feels alone.</span>
+                        <span className="text-transparent bg-clip-text" style={{ backgroundImage: 'linear-gradient(90deg, #003b79, #0754a4, #3986d9, #38c4f2)' }}>no one feels alone.</span>
                     </motion.h1>
 
                     <motion.p
@@ -47,6 +48,30 @@ export default function AboutPage() {
                     >
                         BetterTalk is more than just a platform—it&apos;s a movement to democratize mental health support, connecting you with empathy and expertise when you need it most.
                     </motion.p>
+                </div>
+            </section>
+
+            {/* Who We Are Content */}
+            <section className="py-16 px-6 bg-white">
+                <div className="max-w-4xl mx-auto text-lg text-gray-600 leading-relaxed space-y-6">
+                    <p>
+                        Welcome to BetterTalk, your one-stop destination for online therapy consultations. We are a team of passionate therapists and mental health professionals who understand the importance of mental wellness and the impact it has on our daily lives. We provide online therapy services to help individuals overcome their mental health issues and lead a fulfilling life.
+                    </p>
+                    <p>
+                        Our mission is to provide accessible and affordable mental healthcare services to everyone, regardless of their location, age, or background. We believe that everyone has the right to access quality mental health care, and our goal is to make it easy and convenient for people to get the help they need.
+                    </p>
+                    <p>
+                        At BetterTalk, we understand that seeking help for mental health issues can be overwhelming, which why we strive to create a comfortable and safe space for our clients. Our team of experienced therapists specializes in various mental health issues, including anxiety, depression, relationship issues, stress, trauma, and more. We use evidence-based therapies and techniques to help our clients overcome their mental health challenges and lead a happy and healthy life.
+                    </p>
+                    <p>
+                        Our platform is easy to use, and you can book a therapy session with a few clicks. You can access our services from anywhere, whether you are at home, work, or on the go. Our therapists are available at flexible hours to accommodate your busy schedule, and we offer affordable pricing plans to fit your budget.
+                    </p>
+                    <p className="font-medium text-gray-900">
+                        Thank you for choosing BetterTalk for your mental health needs. We are committed to providing you with the best online therapy experience, and we look forward to helping you lead a happy and fulfilling life.
+                    </p>
+                    <p className="text-sm text-gray-500 italic">
+                        If you have any questions or concerns, please feel free to contact us at <a href="mailto:support@bettertalk.com" className="text-blue-600 hover:underline">support@bettertalk.com</a>
+                    </p>
                 </div>
             </section>
 
@@ -169,6 +194,7 @@ export default function AboutPage() {
                 </div>
             </section>
 
+            <WhatsAppFloat />
             <Footer />
         </div>
     );

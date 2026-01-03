@@ -7,6 +7,7 @@ import { useState, useEffect, useRef } from "react";
 import { motion } from "framer-motion";
 import PublicNavbar from "@/components/PublicNavbar";
 import Footer from "@/components/Footer";
+import WhatsAppFloat from "@/components/WhatsAppFloat";
 
 export default function LandingPage() {
     const welcomeRef = useRef<HTMLElement>(null);
@@ -470,8 +471,9 @@ export default function LandingPage() {
                 </div>
             </section>
 
+            <WhatsAppFloat />
             <Footer />
-        </div>
+        </div >
     );
 }
 
