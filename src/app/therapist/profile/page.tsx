@@ -2,11 +2,19 @@
 
 import { useEffect, useState, useRef } from "react";
 import TherapistLayout from "@/components/TherapistLayout";
-import { Loader2, User, Edit2, BadgeCheck, Stethoscope, Phone, Globe, Award, BookOpen, Clock, Camera, Activity } from "lucide-react";
+import { Loader2, User, Edit2, BadgeCheck, Stethoscope, Phone, Globe, Award, BookOpen, Clock, Camera, Activity, Star } from "lucide-react";
 import Image from "next/image";
 import { useSession } from "next-auth/react";
 import ScientificLoader from "@/components/ScientificLoader";
 
+interface Review {
+    id: number;
+    rating: number;
+    review_text: string;
+    created_at: string;
+    reviewer_name: string;
+    reviewer_image?: string;
+}
 
 interface MentorProfile {
     id: number;
@@ -31,6 +39,7 @@ export default function TherapistProfilePage() {
     const { data: session } = useSession();
     const [loading, setLoading] = useState(true);
     const [profile, setProfile] = useState<MentorProfile | null>(null);
+    const [reviews, setReviews] = useState<Review[]>([]);
     const [isEditing, setIsEditing] = useState(false);
 
     // Form State
@@ -67,10 +76,15 @@ export default function TherapistProfilePage() {
                         languages: data.languages || "",
                         experience_years: data.experience_years || 0
                     });
-                    // Note: We don't deliberately set image in formData because we handle it separately or implicitly.
-                    // But if we want to save it on general 'Save', we might need it.
-                    // However, handleImageUpload saves it immediately.
                 }
+
+                // Fetch Reviews
+                const reviewsRes = await fetch("/api/therapist/reviews");
+                if (reviewsRes.ok) {
+                    const reviewsData = await reviewsRes.json();
+                    setReviews(reviewsData);
+                }
+
             } catch (error) {
                 console.error("Failed to fetch profile", error);
             } finally {
@@ -291,6 +305,60 @@ export default function TherapistProfilePage() {
                                 </h3>
                                 <p className="text-gray-600">{profile.expertise_tags || "None listed"}</p>
                             </div>
+                        </div>
+                    </div>
+                )}
+
+                {/* Reviews Section */}
+                {!isEditing && (
+                    <div className="bg-white rounded-3xl p-8 shadow-sm border border-gray-100">
+                        <h2 className="text-xl font-bold text-gray-900 mb-6 flex items-center gap-2">
+                            <Star className="w-5 h-5 text-amber-500 fill-current" /> Client Reviews ({reviews.length})
+                        </h2>
+
+                        <div className="space-y-6">
+                            {reviews.length > 0 ? (
+                                reviews.map((review) => (
+                                    <div key={review.id} className="pb-6 border-b border-gray-100 last:border-0 last:pb-0">
+                                        <div className="flex items-start justify-between mb-2">
+                                            <div className="flex items-center gap-3">
+                                                <div className="w-10 h-10 rounded-full bg-gray-100 overflow-hidden">
+                                                    {review.reviewer_image ? (
+                                                        <Image
+                                                            src={review.reviewer_image}
+                                                            alt={review.reviewer_name}
+                                                            width={40}
+                                                            height={40}
+                                                            className="object-cover w-full h-full"
+                                                        />
+                                                    ) : (
+                                                        <User className="w-full h-full p-2 text-gray-400" />
+                                                    )}
+                                                </div>
+                                                <div>
+                                                    <h4 className="font-bold text-gray-900 text-sm">{review.reviewer_name}</h4>
+                                                    <div className="flex text-amber-500">
+                                                        {[...Array(5)].map((_, i) => (
+                                                            <Star
+                                                                key={i}
+                                                                className={`w-3 h-3 ${i < review.rating ? "fill-current" : "text-gray-300 fill-none"}`}
+                                                            />
+                                                        ))}
+                                                    </div>
+                                                </div>
+                                            </div>
+                                            <span className="text-xs text-gray-400">
+                                                {new Date(review.created_at).toLocaleDateString()}
+                                            </span>
+                                        </div>
+                                        <p className="text-gray-600 text-sm leading-relaxed mt-2 pl-[52px]">
+                                            {review.review_text}
+                                        </p>
+                                    </div>
+                                ))
+                            ) : (
+                                <p className="text-gray-500 text-center py-8">No reviews yet.</p>
+                            )}
                         </div>
                     </div>
                 )}
