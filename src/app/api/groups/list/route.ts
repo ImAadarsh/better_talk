@@ -30,7 +30,7 @@ export async function GET() {
        (SELECT COUNT(*) FROM group_members gm2 WHERE gm2.group_id = g.id AND gm2.user_id = ?) as is_member
        FROM groups g 
        WHERE g.is_active = 1
-       ORDER BY g.created_at DESC`,
+       ORDER BY is_member DESC, member_count DESC`,
             [userId]
         );
 

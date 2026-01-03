@@ -14,6 +14,7 @@ interface Therapist {
     headlines: string;
     patients_treated: number;
     image?: string;
+    avatar_url?: string;
 }
 
 export default function TherapistsPage() {
@@ -38,7 +39,7 @@ export default function TherapistsPage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8">
+            <div className="max-w-7xl mx-auto px-4 md:px-8 py-8 pb-32">
                 <div className="mb-10 text-center md:text-left">
                     <h1 className="text-3xl font-bold text-gray-900 mb-3">Find Your Therapist</h1>
                     <p className="text-gray-600 max-w-2xl text-lg">
@@ -63,8 +64,15 @@ export default function TherapistsPage() {
                                 <div className="flex items-start justify-between mb-6">
                                     <div className="relative">
                                         <div className="w-20 h-20 rounded-full overflow-hidden bg-gray-100 ring-4 ring-gray-50 group-hover:ring-blue-50 transition-all">
-                                            {therapist.image ? (
-                                                <Image src={therapist.image} alt={therapist.name} width={80} height={80} className="w-full h-full object-cover" unoptimized />
+                                            {therapist.image || therapist.avatar_url ? (
+                                                <Image
+                                                    src={therapist.image || therapist.avatar_url || ""}
+                                                    alt={therapist.name}
+                                                    width={80}
+                                                    height={80}
+                                                    className="w-full h-full object-cover"
+                                                    unoptimized
+                                                />
                                             ) : (
                                                 <div className="w-full h-full flex items-center justify-center text-gray-400">
                                                     <Users className="w-8 h-8" />

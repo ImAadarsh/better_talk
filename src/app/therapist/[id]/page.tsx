@@ -66,8 +66,11 @@ export default function TherapistProfilePage() {
         if (params.id) fetchData();
     }, [params.id, router]);
 
-    // Generate next 14 days
-    const dates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i));
+    // Generate next 14 days and filter to only those with available slots
+    const allDates = Array.from({ length: 14 }, (_, i) => addDays(new Date(), i));
+    const dates = allDates.filter(date =>
+        slots.some(slot => isSameDay(parseISO(slot.start_time), date))
+    );
 
     // Filter slots for selected date
     const daySlots = slots.filter(slot => isSameDay(parseISO(slot.start_time), selectedDate));
@@ -84,7 +87,7 @@ export default function TherapistProfilePage() {
 
             if (res.ok) {
                 setShowModal(false);
-                router.push("/sessions?booked=true"); // Assuming /sessions exists or similar
+                router.push(`/sessions/success?therapist=${encodeURIComponent(therapist?.name || "your therapist")}`);
             } else {
                 alert("Failed to book slot. It might have been taken.");
                 window.location.reload();
@@ -110,7 +113,7 @@ export default function TherapistProfilePage() {
 
     return (
         <DashboardLayout>
-            <div className="max-w-6xl mx-auto px-4 py-8">
+            <div className="max-w-6xl mx-auto px-4 py-8 pb-32">
                 {/* Profile Header */}
                 <div className="bg-white rounded-3xl p-8 border border-gray-100 shadow-sm mb-8 flex flex-col md:flex-row gap-8 items-start">
                     <div className="relative shrink-0 mx-auto md:mx-0">

@@ -172,6 +172,8 @@ CREATE TABLE bookings (
   mentor_plan_id        BIGINT UNSIGNED NOT NULL,
   mentor_slot_id        BIGINT UNSIGNED DEFAULT NULL,
   status                ENUM('pending','confirmed','cancelled','expired') NOT NULL DEFAULT 'pending',
+  session_status        ENUM('scheduled','completed') NOT NULL DEFAULT 'scheduled',
+  joining_link          VARCHAR(500) DEFAULT NULL,
   payment_reference     VARCHAR(191) DEFAULT NULL,
   amount_paid_in_inr    INT NOT NULL,
   created_at            TIMESTAMP NOT NULL DEFAULT CURRENT_TIMESTAMP,

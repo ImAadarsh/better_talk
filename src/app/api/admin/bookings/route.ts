@@ -18,22 +18,28 @@ export async function GET(request: Request) {
 
         let query = `
             SELECT 
-                b.id, 
-                u.name as user, 
+                b.id,
+                b.mentor_slot_id,
+                b.session_status,
+                b.joining_link,
+                u.name as user_name, 
                 u.image as user_image,
                 u.avatar_url as user_avatar,
-                t_user.name as therapist, 
-                t_user.image as therapist_image,
-                t_user.avatar_url as therapist_avatar,
-                DATE_FORMAT(ms.start_time, '%Y-%m-%d') as date, 
-                DATE_FORMAT(ms.start_time, '%h:%i %p') as time, 
-                b.amount_paid_in_inr as amount, 
-                b.status 
+                t_user.name as mentor_name, 
+                t_user.image as mentor_image,
+                t_user.avatar_url as mentor_avatar,
+                ms.start_time,
+                ms.end_time,
+                CONCAT(mp.session_duration_min, ' Min Session') as plan_name,
+                mp.price_in_inr as price,
+                (SELECT COUNT(*) FROM session_notes sn WHERE sn.booking_id = b.id) as has_notes,
+                (SELECT id FROM chats c WHERE c.booking_id = b.id) as chat_id
             FROM bookings b
-            JOIN users u ON b.user_id = u.id
-            JOIN mentors m ON b.mentor_id = m.id
-            JOIN users t_user ON m.user_id = t_user.id
+            LEFT JOIN users u ON b.user_id = u.id
+            LEFT JOIN mentors m ON b.mentor_id = m.id
+            LEFT JOIN users t_user ON m.user_id = t_user.id
             LEFT JOIN mentor_slots ms ON b.mentor_slot_id = ms.id
+            LEFT JOIN mentor_plans mp ON b.mentor_plan_id = mp.id
         `;
 
         const params: any[] = [];

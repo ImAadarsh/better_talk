@@ -3,8 +3,8 @@
 import { useEffect, useState } from "react";
 import Image from "next/image";
 import DashboardLayout from "@/components/DashboardLayout";
-import { Calendar, Clock, Video, User, MoreVertical } from "lucide-react";
-import { format, isPast, parseISO } from "date-fns";
+import { Calendar, Clock, Video, User, MoreVertical, FileText, MessageCircle, X } from "lucide-react";
+import { format, isPast, parseISO, addDays, differenceInSeconds } from "date-fns";
 import ScientificLoader from "@/components/ScientificLoader";
 
 interface Session {
@@ -14,12 +14,20 @@ interface Session {
     other_party_name: string;
     other_party_image?: string;
     other_party_role: string;
+    joining_link?: string;
+    session_status?: 'scheduled' | 'completed';
+    booking_id?: number;
+    chat_window_days?: number;
+    has_notes?: number;
 }
 
 export default function SessionsPage() {
     const [sessions, setSessions] = useState<Session[]>([]);
     const [loading, setLoading] = useState(true);
     const [activeTab, setActiveTab] = useState<'upcoming' | 'past'>('upcoming');
+    const [showNotesModal, setShowNotesModal] = useState(false);
+    const [selectedSessionNotes, setSelectedSessionNotes] = useState<string | null>(null);
+    const [loadingNotes, setLoadingNotes] = useState(false);
 
     useEffect(() => {
         async function fetchSessions() {
@@ -37,14 +45,65 @@ export default function SessionsPage() {
         fetchSessions();
     }, []);
 
-    const upcomingSessions = sessions.filter(s => !isPast(parseISO(s.end_time)));
-    const pastSessions = sessions.filter(s => isPast(parseISO(s.end_time))).reverse();
+    const fetchNotes = async (slotId: number) => {
+        setLoadingNotes(true);
+        try {
+            const res = await fetch(`/api/sessions/${slotId}/notes`);
+            if (res.ok) {
+                const data = await res.json();
+                setSelectedSessionNotes(data.notes_text || "No notes available for this session.");
+                setShowNotesModal(true);
+            }
+        } catch (error) {
+            console.error("Failed to fetch notes", error);
+        } finally {
+            setLoadingNotes(false);
+        }
+    };
+
+    const handleOpenChat = async (bookingId: number) => {
+        try {
+            const res = await fetch("/api/chats/create", {
+                method: "POST",
+                headers: { "Content-Type": "application/json" },
+                body: JSON.stringify({ bookingId }),
+            });
+            if (res.ok) {
+                const { chatId } = await res.json();
+                window.location.href = `/sessions/${chatId}/chat`;
+            }
+        } catch (error) {
+            console.error("Failed to create chat", error);
+        }
+    };
+
+    const getChatTimeRemaining = (endTime: string, chatWindowDays: number) => {
+        const chatEndDate = addDays(parseISO(endTime), chatWindowDays);
+        const now = new Date();
+        if (now > chatEndDate) return null;
+
+        const seconds = differenceInSeconds(chatEndDate, now);
+        const days = Math.floor(seconds / 86400);
+        const hours = Math.floor((seconds % 86400) / 3600);
+
+        if (days > 0) return `${days}d ${hours}h left`;
+        if (hours > 0) return `${hours}h left`;
+        return "Expires soon";
+    };
+
+    // Sessions are completed if: session_status is 'completed' OR end_time has passed
+    const upcomingSessions = sessions.filter(s =>
+        s.session_status !== 'completed' && !isPast(parseISO(s.end_time))
+    );
+    const pastSessions = sessions.filter(s =>
+        s.session_status === 'completed' || isPast(parseISO(s.end_time))
+    ).reverse();
 
     const displayedSessions = activeTab === 'upcoming' ? upcomingSessions : pastSessions;
 
     return (
         <DashboardLayout>
-            <div className="max-w-5xl mx-auto px-4 py-8">
+            <div className="max-w-5xl mx-auto px-4 py-8 pb-32">
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <div>
                         <h1 className="text-3xl font-bold text-gray-900 mb-2">My Sessions</h1>
@@ -136,18 +195,66 @@ export default function SessionsPage() {
                                 {/* Actions */}
                                 <div className="w-full md:w-auto flex flex-col gap-2">
                                     {activeTab === 'upcoming' ? (
-                                        <button className="w-full md:w-auto px-6 py-3 bg-brand-primary text-white font-medium rounded-xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20">
-                                            <Video className="w-4 h-4" />
-                                            Join Meeting
-                                        </button>
+                                        session.joining_link ? (
+                                            <a
+                                                href={session.joining_link}
+                                                target="_blank"
+                                                rel="noopener noreferrer"
+                                                className="w-full md:w-auto px-6 py-3 bg-brand-primary text-white font-medium rounded-xl hover:bg-brand-primary/90 transition-all flex items-center justify-center gap-2 shadow-lg shadow-brand-primary/20"
+                                            >
+                                                <Video className="w-4 h-4" />
+                                                Join Meeting
+                                            </a>
+                                        ) : (
+                                            <div className="w-full md:w-auto px-6 py-3 bg-gray-100 text-gray-600 font-medium rounded-xl flex items-center justify-center gap-2 text-sm">
+                                                <Clock className="w-4 h-4" />
+                                                Link pending
+                                            </div>
+                                        )
                                     ) : (
-                                        <button className="w-full md:w-auto px-6 py-3 bg-gray-100 text-gray-900 font-medium rounded-xl hover:bg-gray-200 transition-all">
-                                            View Notes
-                                        </button>
+                                        <div className="flex flex-col gap-2">
+                                            {session.has_notes === 1 && (
+                                                <button
+                                                    onClick={() => fetchNotes(session.id)}
+                                                    disabled={loadingNotes}
+                                                    className="w-full md:w-auto px-6 py-3 bg-blue-50 text-blue-700 font-medium rounded-xl hover:bg-blue-100 transition-all flex items-center justify-center gap-2"
+                                                >
+                                                    <FileText className="w-4 h-4" />
+                                                    View Notes
+                                                </button>
+                                            )}
+                                            {session.booking_id && session.chat_window_days !== undefined && (
+                                                <button
+                                                    onClick={() => handleOpenChat(session.booking_id!)}
+                                                    disabled={!getChatTimeRemaining(session.end_time, session.chat_window_days)}
+                                                    className="w-full md:w-auto px-6 py-3 bg-green-50 text-green-700 font-medium rounded-xl hover:bg-green-100 transition-all flex items-center justify-center gap-2 disabled:opacity-50 disabled:cursor-not-allowed"
+                                                >
+                                                    <MessageCircle className="w-4 h-4" />
+                                                    {getChatTimeRemaining(session.end_time, session.chat_window_days) || "Chat Expired"}
+                                                </button>
+                                            )}
+                                        </div>
                                     )}
                                 </div>
                             </div>
                         ))}
+                    </div>
+                )}
+
+                {/* Notes Modal */}
+                {showNotesModal && (
+                    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm" onClick={() => setShowNotesModal(false)}>
+                        <div className="bg-white rounded-3xl p-6 w-full max-w-2xl shadow-2xl" onClick={(e) => e.stopPropagation()}>
+                            <div className="flex items-center justify-between mb-4">
+                                <h3 className="text-xl font-bold text-gray-900">Session Notes</h3>
+                                <button onClick={() => setShowNotesModal(false)} className="p-2 hover:bg-gray-100 rounded-lg">
+                                    <X className="w-5 h-5" />
+                                </button>
+                            </div>
+                            <div className="bg-gray-50 rounded-xl p-4 max-h-96 overflow-y-auto">
+                                <p className="text-gray-700 whitespace-pre-wrap">{selectedSessionNotes}</p>
+                            </div>
+                        </div>
                     </div>
                 )}
             </div>

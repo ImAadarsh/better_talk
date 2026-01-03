@@ -37,19 +37,19 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
 
     // Define Navigation Items
     let navItems = [
-        { label: "Community", href: "/groups", icon: Users },
-        { label: "Therapists", href: "/therapists", icon: Stethoscope },
-        { label: "Sessions", href: "/sessions", icon: Video },
-        { label: "Profile", href: "/profile", icon: User },
+        { label: "Community", href: "/groups", icon: "/user_section_icons/community.png" },
+        { label: "Therapists", href: "/therapists", icon: "/user_section_icons/therapist.png" },
+        { label: "Sessions", href: "/sessions", icon: "/user_section_icons/session.png" },
+        { label: "Profile", href: "/profile", icon: "/user_section_icons/profile.png" },
     ];
 
     // If Mentor (Verified), Override Items
     if (session?.user && (session.user as any).role === 'mentor' && (session.user as any).is_verified) {
         navItems = [
-            { label: "Community", href: "/groups", icon: Users },
-            { label: "Sessions", href: "/sessions", icon: Calendar },
-            { label: "Profile", href: "/profile", icon: User },
-            { label: "Schedule", href: "/therapist/schedule", icon: Clock },
+            { label: "Community", href: "/groups", icon: "/user_section_icons/community.png" },
+            { label: "Sessions", href: "/sessions", icon: "/user_section_icons/session.png" },
+            { label: "Profile", href: "/profile", icon: "/user_section_icons/profile.png" },
+            { label: "Schedule", href: "/therapist/schedule", icon: "/user_section_icons/session.png" },
         ];
     }
 
@@ -76,7 +76,15 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                     : "text-gray-500 hover:bg-gray-50 hover:text-gray-900 hover:translate-x-1"
                                     }`}
                             >
-                                <item.icon className={`w-5 h-5 ${active ? "text-white" : "text-gray-400 group-hover:text-gray-900"}`} />
+                                <div className="w-5 h-5 relative">
+                                    <Image
+                                        src={item.icon}
+                                        alt={item.label}
+                                        width={20}
+                                        height={20}
+                                        className="w-full h-full object-contain"
+                                    />
+                                </div>
                                 <span className="font-medium">{item.label}</span>
                             </Link>
                         );
@@ -111,6 +119,13 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                 {!isGroupDetail && (
                     <div className="md:hidden sticky top-0 z-20 bg-white/80 backdrop-blur-md border-b border-gray-100 px-4 py-3 flex items-center justify-between">
                         <div className="flex items-center gap-2">
+                            <Image
+                                src="/better-talk-logo.png"
+                                alt="BetterTalk"
+                                width={32}
+                                height={32}
+                                className="w-8 h-8 object-contain"
+                            />
                             <h1 className="text-lg font-bold bg-gradient-to-r from-brand-primary to-blue-600 bg-clip-text text-transparent">
                                 BetterTalk
                             </h1>
@@ -183,13 +198,21 @@ export default function DashboardLayout({ children }: DashboardLayoutProps) {
                                 className={`flex flex-col items-center gap-1 w-full h-full justify-center transition-colors ${active ? "text-brand-primary" : "text-gray-400"
                                     }`}
                             >
-                                <item.icon className={`w-5 h-5 ${active ? "fill-current" : ""}`} />
+                                <div className="w-5 h-5 relative">
+                                    <Image
+                                        src={item.icon}
+                                        alt={item.label}
+                                        width={20}
+                                        height={20}
+                                        className="w-full h-full object-contain"
+                                    />
+                                </div>
                                 <span className="text-[10px] font-medium">{item.label}</span>
                             </Link>
                         );
                     })}
                 </div>
             </nav>
-        </div>
+        </div >
     );
 }

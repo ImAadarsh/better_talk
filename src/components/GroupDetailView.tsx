@@ -4,6 +4,7 @@ import { useEffect, useState, useRef } from "react";
 import { Loader2, Users, MessageSquare, ThumbsUp, Send, ArrowLeft, LogOut, ChevronDown, ChevronUp, BadgeCheck, Pencil, X, Check } from "lucide-react";
 import { useParams, useRouter } from "next/navigation";
 import Image from "next/image";
+import Link from "next/link";
 import ScientificLoader from "@/components/ScientificLoader";
 
 interface Comment {
@@ -17,6 +18,7 @@ interface Comment {
     is_author?: number;
     author_image?: string;
     author_avatar?: string;
+    author_id?: number;
 }
 
 interface Post {
@@ -33,6 +35,7 @@ interface Post {
     is_author?: number;
     author_image?: string;
     author_avatar?: string;
+    author_id?: number;
 }
 interface GroupDetail {
     id: number;
@@ -412,10 +415,16 @@ export default function GroupDetailView() {
                                     <div className="flex items-center justify-between">
                                         <div className="flex items-center gap-1">
                                             {post.author_role === 'mentor' ? (
-                                                <p className="font-bold text-gray-900 text-sm truncate flex items-center gap-1">
-                                                    {post.author_name}
+                                                <div className="font-bold text-gray-900 text-sm truncate flex items-center gap-1">
+                                                    {post.author_id ? (
+                                                        <Link href={`/therapist/${post.author_id}`} className="hover:text-brand-primary hover:underline transition-colors">
+                                                            {post.author_name}
+                                                        </Link>
+                                                    ) : (
+                                                        <span>{post.author_name}</span>
+                                                    )}
                                                     {post.is_verified === 1 && <BadgeCheck className="w-4 h-4 text-blue-500 fill-blue-500 text-white" />}
-                                                </p>
+                                                </div>
                                             ) : (
                                                 <p className="font-bold text-gray-900 text-sm truncate">{post.anonymous_username}</p>
                                             )}
@@ -508,10 +517,16 @@ export default function GroupDetailView() {
                                                                             </div>
                                                                         )}
                                                                     </div>
-                                                                    <span className="font-bold text-gray-900 text-xs flex items-center gap-1">
-                                                                        {comment.author_name}
-                                                                        <BadgeCheck className="w-3 h-3 text-blue-500 fill-blue-500 text-white" />
-                                                                    </span>
+                                                                    <div className="font-bold text-gray-900 text-xs truncate flex items-center gap-1">
+                                                                        {comment.author_id ? (
+                                                                            <Link href={`/therapist/${comment.author_id}`} className="hover:text-brand-primary hover:underline transition-colors">
+                                                                                {comment.author_name}
+                                                                            </Link>
+                                                                        ) : (
+                                                                            <span>{comment.author_name}</span>
+                                                                        )}
+                                                                        {comment.is_verified === 1 && <BadgeCheck className="w-3 h-3 text-blue-500 fill-blue-500 text-white" />}
+                                                                    </div>
                                                                 </>
                                                             ) : (
                                                                 <span className="font-bold text-gray-700 text-xs">{comment.anonymous_username}</span>

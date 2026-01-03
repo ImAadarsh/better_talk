@@ -1,7 +1,4 @@
-
 import { NextResponse } from "next/server";
-
-export const dynamic = 'force-dynamic';
 import pool from "@/lib/db";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/lib/auth";
@@ -13,15 +10,17 @@ export async function GET() {
             return NextResponse.json({ error: "Unauthorized" }, { status: 401 });
         }
 
-        // Fetch all verified Therapists
-        const [rows] = await pool.execute(
-            `SELECT m.id, u.name, m.designation, m.headlines, m.patients_treated, u.image, u.avatar_url 
-             FROM mentors m 
-             JOIN users u ON m.user_id = u.id 
-             WHERE m.is_verified = 1`
-        );
+        // Get user details
+        const [userRows] = await pool.execute(
+            "SELECT id, name, email, role, image, avatar_url FROM users WHERE email = ?",
+            [session.user?.email]
+        ) as any[];
 
-        return NextResponse.json(rows);
+        if (userRows.length === 0) {
+            return NextResponse.json({ error: "User not found" }, { status: 404 });
+        }
+
+        return NextResponse.json(userRows[0]);
 
     } catch (error) {
         console.error("Database error:", error);

@@ -34,8 +34,14 @@ export default function AdminLoginPage() {
 
             <div className="w-full max-w-md bg-white p-10 rounded-[2.5rem] shadow-2xl shadow-gray-200/50 border border-gray-100 relative z-10">
                 <div className="text-center space-y-4 mb-10">
-                    <div className="w-20 h-20 bg-gray-900 rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-gray-900/20">
-                        <ShieldCheck className="w-10 h-10 text-white" />
+                    <div className="w-20 h-20 bg-white rounded-3xl flex items-center justify-center mx-auto mb-6 shadow-xl shadow-gray-900/20 p-3">
+                        <Image
+                            src="/better-talk-logo.png"
+                            alt="BetterTalk"
+                            width={80}
+                            height={80}
+                            className="w-full h-full object-contain"
+                        />
                     </div>
                     <h1 className="text-3xl font-extrabold text-gray-900 tracking-tight">Admin Portal</h1>
                     <p className="text-gray-400 font-bold text-xs uppercase tracking-widest bg-gray-50 px-3 py-1.5 rounded-full w-fit mx-auto border border-gray-100 italic">
@@ -69,8 +75,7 @@ export default function AdminLoginPage() {
             </div>
 
             <p className="mt-8 text-[11px] font-bold text-gray-300 uppercase tracking-[0.2em] text-center">
-                &copy; 2026 BetterTalk Digital Infrastructure <br />
-                <span className="text-gray-400">Developed By Endeavour Digital</span>
+                <span className="text-gray-400">Design & Developed By <a href="https://endevourdigital.in" target="_blank" className="text-gray-900 hover:text-gray-600 transition-colors">Endeavour Digital</a></span>
             </p>
 
         </div>

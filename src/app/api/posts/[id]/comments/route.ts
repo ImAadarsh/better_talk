@@ -26,7 +26,7 @@ export async function GET(
         }
 
         const [rows] = await pool.execute(
-            `SELECT c.id, c.content, c.created_at, u.anonymous_username, u.name as author_name, u.role as author_role, u.image as author_image, u.avatar_url as author_avatar, m.is_verified,
+            `SELECT c.id, c.content, c.created_at, m.id as author_id, u.anonymous_username, u.name as author_name, u.role as author_role, u.image as author_image, u.avatar_url as author_avatar, m.is_verified,
              CASE WHEN c.user_id = ? THEN 1 ELSE 0 END as is_author
        FROM group_post_comments c
        JOIN users u ON c.user_id = u.id

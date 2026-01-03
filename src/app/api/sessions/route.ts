@@ -44,9 +44,15 @@ export async function GET() {
 
             query = `
                 SELECT ms.id, ms.start_time, ms.end_time,
-                       u.name as other_party_name, u.image as other_party_image, 'Client' as other_party_role
+                       u.name as other_party_name, u.image as other_party_image, 'Client' as other_party_role,
+                       b.id as booking_id, b.joining_link, b.session_status,
+                       mp.chat_window_days,
+                       CASE WHEN sn.id IS NOT NULL THEN 1 ELSE 0 END as has_notes
                 FROM mentor_slots ms
                 JOIN users u ON ms.client_id = u.id
+                LEFT JOIN bookings b ON b.mentor_slot_id = ms.id
+                LEFT JOIN mentor_plans mp ON ms.mentor_plans_id = mp.id
+                LEFT JOIN session_notes sn ON sn.booking_id = b.id
                 WHERE ms.mentor_id = ? AND ms.is_booked = 1
                 ORDER BY ms.start_time ASC
             `;
@@ -57,10 +63,16 @@ export async function GET() {
             // Join with mentors -> users (as mentor)
             query = `
                 SELECT ms.id, ms.start_time, ms.end_time,
-                       u.name as other_party_name, u.image as other_party_image, m.designation as other_party_role
+                       u.name as other_party_name, u.image as other_party_image, m.designation as other_party_role,
+                       b.id as booking_id, b.joining_link, b.session_status,
+                       mp.chat_window_days,
+                       CASE WHEN sn.id IS NOT NULL THEN 1 ELSE 0 END as has_notes
                 FROM mentor_slots ms
                 JOIN mentors m ON ms.mentor_id = m.id
                 JOIN users u ON m.user_id = u.id
+                LEFT JOIN bookings b ON b.mentor_slot_id = ms.id
+                LEFT JOIN mentor_plans mp ON ms.mentor_plans_id = mp.id
+                LEFT JOIN session_notes sn ON sn.booking_id = b.id
                 WHERE ms.client_id = ?
                 ORDER BY ms.start_time ASC
             `;

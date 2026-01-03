@@ -233,7 +233,7 @@ export default function TherapistOnboarding() {
 
     return (
         <div className="min-h-screen bg-brand-bg py-12 px-4">
-            <div className="max-w-2xl mx-auto">
+            <div className="max-w-2xl mx-auto pb-32">
                 {/* Header */}
                 <div className="text-center mb-10">
                     <h1 className="text-3xl font-bold text-gray-900">Complete Your Profile</h1>
